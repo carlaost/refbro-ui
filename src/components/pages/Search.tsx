@@ -2,9 +2,12 @@ import { useState } from "react"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { X } from "lucide-react" // For the remove X icon
+import { useNavigate } from 'react-router-dom'
 
 export default function Search() {
+    const navigate = useNavigate()
     const [inputText, setInputText] = useState("")
+    const [queryText, setQueryText] = useState("")
     const [dois, setDois] = useState<string[]>([])
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -59,6 +62,40 @@ export default function Search() {
         }
     }
 
+    const handleQuerySubmit = async () => {
+        if (!queryText.trim()) return
+        
+        setIsLoading(true)
+        setError(null)
+        
+        const queries = queryText.split(',').map(q => q.trim()).filter(q => q)
+        console.log('Submitting queries:', queries)
+
+        try {
+            const response = await fetch('https://refbro.onrender.com/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(queries)
+            })
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch query results: ${response.statusText}`)
+            }
+
+            const data = await response.json()
+            // Navigate to results page with the papers data
+            navigate('/results', { state: { papers: data } })
+
+        } catch (err) {
+            console.error('Error details:', err)
+            setError('Failed to fetch query results')
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
     return (
         <div className="flex flex-col items-start justify-center max-w-lg mx-auto pt-20 gap-4">
             <div className="flex flex-col items-start text-left">
@@ -108,6 +145,29 @@ export default function Search() {
                     disabled={isLoading || dois.length === 0}
                 >
                     {isLoading ? 'Loading...' : 'Submit papers'}
+                </Button>
+            </div>
+            <div className="flex flex-col items-start text-left">
+                <h1 className="text-2xl font-semibold tracking-tight">Paste search queries</h1>
+                <p className="text-sm text-gray-500">Just to test the API call. Separate with commas.</p>
+            </div>
+
+            <div className="grid w-full gap-2">
+                <Textarea 
+                    placeholder="Paste keyword sets here. Separate with commas." 
+                    value={queryText}
+                    onChange={(e) => setQueryText(e.target.value)}
+                />
+
+                {error && (
+                    <p className="text-red-500 text-sm">{error}</p>
+                )}
+
+                <Button 
+                    onClick={handleQuerySubmit} 
+                    disabled={isLoading || !queryText.trim()}
+                >
+                    {isLoading ? 'Loading...' : 'Submit queries'}
                 </Button>
             </div>
         </div>
