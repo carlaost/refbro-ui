@@ -6,6 +6,8 @@ import { X } from "lucide-react" // For the remove X icon
 export default function Search() {
     const [inputText, setInputText] = useState("")
     const [dois, setDois] = useState<string[]>([])
+    const [isLoading, setIsLoading] = useState(false)
+    const [error, setError] = useState<string | null>(null)
 
     const extractDois = (text: string) => {
         // Regex to match both DOI formats, allowing dots in the suffix
@@ -21,6 +23,40 @@ export default function Search() {
 
     const removeDoi = (doiToRemove: string) => {
         setDois(dois.filter(doi => doi !== doiToRemove))
+    }
+
+    const handleSubmit = async () => {
+        if (dois.length === 0) return
+        
+        setIsLoading(true)
+        setError(null)
+        console.log('Submitting DOIs:', dois)
+
+        try {
+            const response = await fetch('/api/openalex/fetchMetadata', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ dois }),
+            })
+
+            console.log('Response status:', response.status)
+            const data = await response.json()
+            console.log('Response data:', data)
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch paper metadata: ${data.error || 'Unknown error'}`)
+            }
+
+            console.log('Successfully fetched papers:', data.papers)
+
+        } catch (err) {
+            console.error('Error details:', err)
+            setError('Failed to fetch paper metadata')
+        } finally {
+            setIsLoading(false)
+        }
     }
 
     return (
@@ -63,7 +99,16 @@ export default function Search() {
                     )}
                 </div>
 
-                <Button>Submit papers</Button>
+                {error && (
+                    <p className="text-red-500 text-sm">{error}</p>
+                )}
+
+                <Button 
+                    onClick={handleSubmit} 
+                    disabled={isLoading || dois.length === 0}
+                >
+                    {isLoading ? 'Loading...' : 'Submit papers'}
+                </Button>
             </div>
         </div>
     )
