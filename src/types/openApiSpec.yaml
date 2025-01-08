@@ -1,0 +1,89 @@
+openapi: 3.0.0
+info:
+  title: Publication API
+  version: '1.0'
+  description: API for retrieving publication details from DOIs
+
+paths:
+  /api/publications:
+    post:
+      summary: Retrieve publication details from DOIs
+      description: Takes a list of DOIs and returns publication metadata
+      operationId: getPublicationDetails
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                dois:
+                  type: array
+                  items:
+                    type: string
+                    format: doi
+                  example: ["10.1000/xyz123", "10.1000/abc456"]
+              required:
+                - dois
+      responses:
+        '200':
+          description: Successful retrieval of publication details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  publications:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        title:
+                          type: string
+                          example: "Example Research Paper Title"
+                        authors:
+                          type: array
+                          items:
+                            type: string
+                          example: ["John Doe", "Jane Smith"]
+                        year:
+                          type: integer
+                          format: int32
+                          example: 2024
+                        journal:
+                          type: string
+                          example: "Journal of Example Studies"
+                        abstract:
+                          type: string
+                          example: "This is an example abstract of the research paper..."
+                      required:
+                        - title
+                        - authors
+                        - year
+                        - journal
+                        - abstract
+        '400':
+          description: Invalid request (e.g., malformed DOIs)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid DOI format"
+        '404':
+          description: One or more DOIs not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Some DOIs could not be found"
+                  notFoundDois:
+                    type: array
+                    items:
+                      type: string
+                    example: ["10.1000/xyz123"]
