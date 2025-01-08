@@ -4,6 +4,13 @@ import { Button } from "@/components/ui/button"
 import { X } from "lucide-react" // For the remove X icon
 import { useNavigate } from 'react-router-dom'
 
+interface Recommendation {
+    title?: string;
+    doi: string | null;
+    publication_year: number;
+    score: number;
+}
+
 export default function Search() {
     const navigate = useNavigate()
     const [inputText, setInputText] = useState("")
@@ -72,12 +79,12 @@ export default function Search() {
         console.log('Submitting queries:', queries)
 
         try {
-            const response = await fetch('https://refbro.onrender.com/', {
+            const response = await fetch('https://refbro.onrender.com/queries', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(queries)
+                body: JSON.stringify({ queries })
             })
 
             if (!response.ok) {
@@ -85,8 +92,17 @@ export default function Search() {
             }
 
             const data = await response.json()
-            // Navigate to results page with the papers data
-            navigate('/results', { state: { papers: data } })
+            // Transform the recommendations to match the Paper interface
+            const papers = data.recommendations.map((rec: Recommendation) => ({
+                title: rec.title || 'No title available',
+                authors: [], // API doesn't provide authors currently
+                year: rec.publication_year?.toString() || 'Unknown',
+                journal: '', // API doesn't provide journal currently
+                doi: rec.doi || '',
+                abstract: '' // API doesn't provide abstract currently
+            }))
+            
+            navigate('/results', { state: { papers } })
 
         } catch (err) {
             console.error('Error details:', err)

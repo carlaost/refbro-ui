@@ -10,11 +10,9 @@ import { ExternalLink } from "lucide-react";
 
 interface Paper {
     title: string;
-    authors: string[];
-    year: string;
-    journal: string;
-    doi: string;
-    abstract: string;
+    doi: string | null;
+    publication_year: number;
+    score: number;
 }
 
 export default function Results() {
@@ -45,19 +43,20 @@ export default function Results() {
                                 <div className="flex items-start">
                                     <h2 className="text-lg font-semibold tracking-tight">{paper.title}</h2>
                                     <button
-                                        onClick={(e) => handleDoiClick(e, paper.doi)}
+                                        onClick={(e) => handleDoiClick(e, paper.doi || '')}
                                         className="ml-2 p-1 hover:bg-gray-100 bg-transparent rounded-full"
                                     >
                                         <ExternalLink className="w-4 h-4" />
                                     </button>
                                 </div>
-                                <p className="text-sm text-gray-500 font-normal">
+                                {/* <p className="text-sm text-gray-500 font-normal">
                                     {paper.authors.join(', ')} • {paper.year} • {paper.journal}
-                                </p>
+                                </p> */}
                             </div>
                         </AccordionTrigger>
                         <AccordionContent>
-                            {paper.abstract}
+                            {/* {paper.abstract} */}
+                            Abstract goes here.
                         </AccordionContent>
                     </AccordionItem>
                 ))}
