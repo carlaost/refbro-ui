@@ -38,6 +38,10 @@ paths:
                     items:
                       type: object
                       properties:
+                        doi:
+                          type: string
+                          format: doi
+                          example: "10.1000/xyz123"
                         title:
                           type: string
                           example: "Example Research Paper Title"
