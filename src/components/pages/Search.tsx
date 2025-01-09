@@ -34,6 +34,7 @@ export default function Search() {
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
+    const [activeTab, setActiveTab] = useState<'upload' | 'paste'>('upload')
 
     // Helper function to get all unique DOIs
     const getAllDois = useCallback(() => {
@@ -181,22 +182,28 @@ export default function Search() {
     }
 
     return (
-        <div className="flex flex-col items-start justify-center max-w-lg mx-auto pt-20 gap-4">
+        <div className="flex flex-col items-start justify-center w-full mx-auto pt-12 gap-4">
 
+            <div className="max-w-lg mx-auto flex flex-col gap-2 mb-24">
 
-            <div className="flex flex-col items-start text-left mb-4">
-                <h1 className="text-2xl font-black tracking-tight">Find new papers to read based on your current interests</h1>
+            <div className="flex flex-col items-start text-left mb-8">
+                <h1 className="text-2xl font-black tracking-tight">Find new papers to read based on your current reading list</h1>
                 <p className="text-gray-500">Oshima is a research paper recommender that keeps you updated with the latest research in your field. Provide some papers you've been reading or saving below to receive your first recommendation.</p>
             </div>
 
 
-            <Tabs defaultValue="upload" className="w-full">
+            <Tabs 
+                defaultValue="upload" 
+                className="w-full"
+                onValueChange={(value) => setActiveTab(value as 'upload' | 'paste')}
+                value={activeTab}
+            >
                 <TabsList>
                     <TabsTrigger value="upload">Upload references</TabsTrigger>
                     <TabsTrigger value="paste">Paste paper DOIs</TabsTrigger>
                 </TabsList>
-                <TabsContent value="upload" className="w-full flex flex-col gap-2 text-left text-sm text-gray-500">
-                    Upload a BibTeX or RIS file containing relevant papers below.
+                <TabsContent value="upload" className="w-full flex flex-col gap-2 text-left text-gray-500">
+                    Upload a BibTeX or RIS file from your reference manager.
                     <div 
                         {...getRootProps()} 
                         className={`border-2 border-dashed rounded-lg pt-6 text-center cursor-pointer
@@ -226,7 +233,7 @@ export default function Search() {
 
                     
                 </TabsContent>
-                <TabsContent value="paste" className="w-full flex flex-col gap-2 text-left text-sm text-gray-500">
+                <TabsContent value="paste" className="w-full flex flex-col gap-2 text-left text-gray-500">
                     Paste the DOIs of relevant papers below. Don't worry about formatting, we know a DOI when we see one.
                     <Textarea 
                         placeholder="https://doi.org/10.2172/1216566, doi.org/10.1000/182, 10.1025/23456654" 
@@ -263,6 +270,105 @@ export default function Search() {
             >
                 {isLoading ? 'Loading...' : `Submit ${getAllDois().length > 0 ? `${getAllDois().length} DOIs` : 'DOIs'}`}
             </Button>
+            </div>
+
+
+            <div className="mt-20 w-full" >
+                
+                {activeTab === 'upload' ? (
+                    <div>
+                        <p className="text-lg font-black mb-4">Export and upload your references in 3 quick steps</p>
+                        <div className="grid grid-cols-3 gap-8 px-20 ">
+                        
+                            <div className="flex flex-col items-center">
+                                <p className=" text-sm text-gray-600 text-center w-full mb-2">
+                                    1. Export your Zotero collection via right-click &gt; Export collection
+                                </p>
+                                <img
+                                    src="/src/assets/step-1.png"
+                                    alt="Step 1"
+                                    className="w-full h-auto rounded-lg shadow-md"
+                                />
+                            </div>
+                            <div className="flex flex-col items-center">
+                        
+                                <p className=" text-sm text-center w-full mb-2">
+                                    2. Save as BibTeX (.bib) or RIS (.ris) file
+                                </p>
+                                <img
+                                    src="/src/assets/step-2.png"
+                                    alt="Step 2"
+                                    className="w-full h-auto rounded-lg shadow-md"
+                                />
+                            </div>
+                            <div className="flex flex-col items-center justify-start">
+                        
+                                <p className=" text-sm text-gray-600 text-center w-full mb-2">
+                                    3. Upload your file to Oshima
+                                </p>
+                                <video
+                                    src="/src/assets/upload.mp4"
+                                    className="w-full h-auto rounded-lg shadow-md"
+                                    muted
+                                    autoPlay
+                                    loop
+                                    controls={false}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <div>
+                        <p className="text-lg font-black mb-4">Copy and paste DOIs of relevant papers</p>
+                        <div className="grid grid-cols-3 gap-8 px-20 ">
+                        
+                            <div className="flex flex-col items-center">
+                                <p className=" text-sm text-gray-600 text-center w-full mb-2">
+                                    DOIs can usually be found on the title page of a paper.
+                                </p>
+                                <video
+                                    src="/src/assets/pdf.mp4"
+                                    className="w-full h-auto rounded-lg shadow-md"
+                                    muted
+                                    autoPlay
+                                    loop
+                                    controls={false}
+                                />
+                            </div>
+                            <div className="flex flex-col items-center">
+                        
+                                <p className=" text-sm text-center w-full mb-2">
+                                    Most journal and preprint websites will have a DOI available.
+                                </p>
+                                <video
+                                    src="/src/assets/arxiv.mp4"
+                                    className="w-full h-auto rounded-lg shadow-md"
+                                    muted
+                                    autoPlay
+                                    loop
+                                    controls={false}
+                                />
+                            </div>
+                            <div className="flex flex-col items-center justify-start">
+                        
+                                <p className=" text-sm text-gray-600 text-center w-full mb-2">
+                                    You can also paste a raw .bib or .risfile.
+                                </p>
+                                <video
+                                    src="/src/assets/bibtex.mp4"
+                                    className="w-full h-auto rounded-lg shadow-md"
+                                    muted
+                                    autoPlay
+                                    loop
+                                    controls={false}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            
 
 
             
@@ -285,6 +391,8 @@ export default function Search() {
                     {isLoading ? 'Loading...' : 'Submit queries'}
                 </Button>
             </div>
+
+            
         </div>
     )
 }
