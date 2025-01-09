@@ -7,7 +7,7 @@ function App() {
   return (
     <Router>
       <nav className="flex flex-row w-screen py-2 px-6 justify-start items-center">
-        <Link to="/" className="text-black hover:text-gray-500 ">refBro</Link>
+        <Link to="/" className="text-black hover:text-gray-500 ">Oshima</Link>
 
       </nav>
 

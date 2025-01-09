@@ -1,8 +1,11 @@
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { X } from "lucide-react" // For the remove X icon
 import { useNavigate } from 'react-router-dom'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useDropzone } from 'react-dropzone'
+
 
 interface Recommendation {
     title?: string;
@@ -18,10 +21,11 @@ export default function Search() {
     const [dois, setDois] = useState<string[]>([])
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
 
     const extractDois = (text: string) => {
         // Regex to match both DOI formats, allowing dots in the suffix
-        const doiRegex = /(?:https?:\/\/doi\.org\/|(?:doi:)?)?(10\.\d{4,}(?:\.\d+)*\/[a-zA-Z0-9.-]+?)(?:[^a-zA-Z0-9.]|$)/g
+        const doiRegex = /(?:https?:\/\/doi\.org\/|(?:doi:)?)?(10\.\d{4,}(?:\.\d+)*\/[-%\w.()]+)(?:[^-%\w.()]|$)/g
         
         // Extract unique DOIs
         const matches = [...new Set(
@@ -112,63 +116,141 @@ export default function Search() {
         }
     }
 
+    const onDrop = useCallback(async (acceptedFiles: File[]) => {
+        setIsLoading(true)
+        setError(null)
+        setUploadedFiles(acceptedFiles)
+
+        try {
+            for (const file of acceptedFiles) {
+                const text = await file.text()
+                const extension = file.name.split('.').pop()?.toLowerCase()
+
+                if (extension === 'bib' || extension === 'bibtex') {
+                    // BibTeX files often contain DOIs in the doi = {10.1234/...} format
+                    extractDois(text)
+                } else if (extension === 'ris') {
+                    // RIS files typically contain DOIs in the DO  - 10.1234/... format
+                    extractDois(text)
+                }
+            }
+        } catch (err) {
+            console.error('Error processing file:', err)
+            setError('Failed to process file. Please make sure it\'s a valid BibTeX or RIS file.')
+        } finally {
+            setIsLoading(false)
+        }
+    }, [])
+
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({
+        onDrop,
+        accept: {
+            'application/x-bibtex': ['.bib', '.bibtex'],
+            'application/x-research-info-systems': ['.ris']
+        }
+    })
+
+    const removeFile = (fileName: string) => {
+        setUploadedFiles(files => files.filter(file => file.name !== fileName))
+    }
+
     return (
         <div className="flex flex-col items-start justify-center max-w-lg mx-auto pt-20 gap-4">
+
+
             <div className="flex flex-col items-start text-left">
                 <h1 className="text-2xl font-semibold tracking-tight">Paste DOIs of interesting papers</h1>
-                <p className="text-sm text-gray-500">Paste a list of DOIs of papers you've been reading to find more relevant publications for your research. Don't worry about formatting.</p>
+                <p className="text-gray-500">Paste DOIs of papers you've been reading or saving to find more relevant publications for your research. You don't need to worry about formatting. <span className="font-semibold">You can also upload a BibTeX or RIS file.</span></p>
             </div>
 
-            <div className="grid w-full gap-2">
-                <Textarea 
-                    placeholder="Paste DOIs here." 
-                    value={inputText}
-                    onChange={(e) => {
-                        setInputText(e.target.value)
-                        extractDois(e.target.value)
-                    }}
-                />
-                
-                {/* DOI Pills */}
-                <div className="flex flex-wrap gap-2">
-                    {dois.slice(0, 6).map((doi) => (
+
+            <Tabs defaultValue="upload" className="w-full">
+                <TabsList>
+                    <TabsTrigger value="upload">Upload file</TabsTrigger>
+                    <TabsTrigger value="paste">Paste DOIs</TabsTrigger>
+                </TabsList>
+                <TabsContent value="upload" className="w-full flex flex-col gap-2 text-left text-sm text-gray-500">
+                    <div 
+                        {...getRootProps()} 
+                        className={`border-2 border-dashed rounded-lg pt-6 text-center cursor-pointer
+                            ${isDragActive ? 'border-primary bg-primary/5' : 'border-gray-300'}`}
+                    >
+                        <input {...getInputProps()} />
+                        <p>Drag and drop your BibTeX or RIS files here, or click to select</p>
+                        <p className="text-xs text-gray-400 mt-2 pb-4">Supported formats: .bib, .bibtex, .ris</p>
+                        <div className="flex flex-wrap gap-2 mt-2 p-1">
+                        {uploadedFiles.map((file) => (
+                            <div 
+                                key={file.name}
+                                className="flex items-center gap-1 px-2 py-0 bg-gray-500 text-white rounded-md h-6 text-xs"
+                            >
+                                <span>{file.name}</span>
+                                <Button 
+                                    variant="ghost"
+                                    onClick={() => removeFile(file.name)}
+                                    className="hover:text-red-500 p-0 rounded-full bg-transparent hover:bg-transparent h-6"
+                                >
+                                    <X size={10} />
+                                </Button>
+                            </div>
+                        ))}
+                    </div>
+                    </div>
+
+                    
+                </TabsContent>
+                <TabsContent value="paste" className="w-full flex flex-col gap-2 text-left text-sm text-gray-500">
+                    Paste the DOIs of papers you've been reading or saving below. Don't worry about formatting - we'll extract them for you.
+                    <Textarea 
+                        placeholder="https://doi.org/10.2172/1216566, doi.org/10.1000/182, 10.1025/23456654" 
+                        value={inputText}
+                        onChange={(e) => {
+                            setInputText(e.target.value)
+                            extractDois(e.target.value)
+                        }}
+                    />
+                    {error && (
+                        <p className="text-red-500 text-sm">{error}</p>
+                    )}
+
+                </TabsContent>
+            </Tabs>
+
+            <div className="flex flex-wrap gap-2">
+                    {dois.slice(0, 3).map((doi) => (
                         <div 
                             key={doi}
-                            className="flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-full text-sm"
+                            className="flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-full text-xs"
                         >
                             <span>{doi}</span>
-                            <button 
+                            <Button 
+                                variant="ghost"
                                 onClick={() => removeDoi(doi)}
-                                className="hover:text-red-500"
+                                className="hover:text-red-500 bg-transparent hover:bg-transparent p-0 h-6"
                             >
                                 <X size={14} />
-                            </button>
+                            </Button>
                         </div>
                     ))}
                     {dois.length > 6 && (
-                        <div className="flex items-center px-2 py-1 bg-gray-100 rounded-full text-sm">
-                            <span>+{dois.length - 6} more DOIs</span>
+                        <div className="flex items-center px-2 py-1 rounded-full text-xs font-medium">
+                            <span>+{dois.length - 6} more DOIs identified</span>
                         </div>
                     )}
                 </div>
 
-                {error && (
-                    <p className="text-red-500 text-sm">{error}</p>
-                )}
+            <Button 
+                onClick={handleSubmit} 
+                disabled={isLoading || dois.length === 0}
+                className="w-full"
+            >
+                {isLoading ? 'Loading...' : `Submit ${dois.length > 0 ? `${dois.length} DOIs` : 'DOIs'}`}
+            </Button>
 
-                <Button 
-                    onClick={handleSubmit} 
-                    disabled={isLoading || dois.length === 0}
-                >
-                    {isLoading ? 'Loading...' : 'Submit papers'}
-                </Button>
-            </div>
-            <div className="flex flex-col items-start text-left">
-                <h1 className="text-2xl font-semibold tracking-tight">Paste search queries</h1>
-                <p className="text-sm text-gray-500">Just to test the API call. Separate with commas.</p>
-            </div>
 
-            <div className="grid w-full gap-2">
+            
+
+            <div className="grid w-full gap-2 mt-52">
                 <Textarea 
                     placeholder="Paste keyword sets here. Separate with commas." 
                     value={queryText}
