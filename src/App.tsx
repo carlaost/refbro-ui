@@ -7,18 +7,18 @@ function App() {
 
   return (
     <Router>
-      <nav className="flex flex-row w-screen py-2 px-6 justify-between items-center">
-        <Link to="/" className="text-black hover:text-gray-500 ">Oshima</Link>
-        <a href="https://docs.google.com/forms/d/e/1FAIpQLScFQH7VteSZsI0l36M7FSqZJ8SmOScVcWWNYhnrccMDX0K8pQ/viewform?usp=sharing" target="_blank" rel="noopener noreferrer" className="text-black hover:text-gray-500">
-          <Button>Beta Access</Button>
-        </a>
-
-      </nav>
-
-      <Routes>
-        <Route path="/" element={<Search />} />
-        <Route path="/results" element={<Results />} />
-      </Routes>
+      <div className="light">
+        <nav className="flex flex-row w-screen py-2 px-6 justify-between items-center">
+          <Link to="/" className="text-black hover:text-gray-500 ">Oshima</Link>
+          <a href="https://docs.google.com/forms/d/e/1FAIpQLScFQH7VteSZsI0l36M7FSqZJ8SmOScVcWWNYhnrccMDX0K8pQ/viewform?usp=sharing" target="_blank" rel="noopener noreferrer" className="text-black hover:text-gray-500">
+            <Button>Beta Access</Button>
+          </a>
+        </nav>
+        <Routes>
+          <Route path="/" element={<Search />} />
+          <Route path="/results" element={<Results />} />
+        </Routes>
+      </div>
     </Router>
   )
 }
