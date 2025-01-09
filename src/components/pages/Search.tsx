@@ -6,6 +6,8 @@ import { useNavigate } from 'react-router-dom'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useDropzone } from 'react-dropzone'
 
+// Add constant for DOI regex pattern
+const DOI_REGEX = /(?:https?:\/\/doi\.org\/|(?:doi:)?)?(10\.\d{4,}(?:\.\d+)*\/[-%\w.()]+)(?:[^-%\w.()]|$)/g
 
 interface Recommendation {
     title?: string;
@@ -14,37 +16,48 @@ interface Recommendation {
     score: number;
 }
 
+// Add new type definitions
+type DoiSource = {
+    type: 'file';
+    fileName: string;
+    dois: string[];
+} | {
+    type: 'pasted';
+    dois: string[];
+}
+
 export default function Search() {
     const navigate = useNavigate()
     const [inputText, setInputText] = useState("")
     const [queryText, setQueryText] = useState("")
-    const [dois, setDois] = useState<string[]>([])
+    const [doiSources, setDoiSources] = useState<DoiSource[]>([])
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
 
-    const extractDois = (text: string) => {
-        // Regex to match both DOI formats, allowing dots in the suffix
-        const doiRegex = /(?:https?:\/\/doi\.org\/|(?:doi:)?)?(10\.\d{4,}(?:\.\d+)*\/[-%\w.()]+)(?:[^-%\w.()]|$)/g
-        
-        // Extract unique DOIs
+    // Helper function to get all unique DOIs
+    const getAllDois = useCallback(() => {
+        return [...new Set(doiSources.flatMap(source => source.dois))]
+    }, [doiSources])
+
+    // Update extractDois to handle pasted DOIs
+    const handlePastedDois = (text: string) => {
         const matches = [...new Set(
-            Array.from(text.matchAll(doiRegex), match => match[1])
+            Array.from(text.matchAll(DOI_REGEX), match => match[1])
         )]
         
-        setDois(matches)
-    }
-
-    const removeDoi = (doiToRemove: string) => {
-        setDois(dois.filter(doi => doi !== doiToRemove))
+        setDoiSources(prev => {
+            const newSources = prev.filter(source => source.type !== 'pasted')
+            return [...newSources, { type: 'pasted', dois: matches }]
+        })
     }
 
     const handleSubmit = async () => {
-        if (dois.length === 0) return
+        const allDois = getAllDois()
+        if (allDois.length === 0) return
         
         setIsLoading(true)
         setError(null)
-        console.log('Submitting DOIs:', dois)
 
         try {
             const response = await fetch('/api/openalex/fetchMetadata', {
@@ -52,7 +65,7 @@ export default function Search() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ dois }),
+                body: JSON.stringify({ dois: allDois }),
             })
 
             console.log('Response status:', response.status)
@@ -126,12 +139,17 @@ export default function Search() {
                 const text = await file.text()
                 const extension = file.name.split('.').pop()?.toLowerCase()
 
-                if (extension === 'bib' || extension === 'bibtex') {
-                    // BibTeX files often contain DOIs in the doi = {10.1234/...} format
-                    extractDois(text)
-                } else if (extension === 'ris') {
-                    // RIS files typically contain DOIs in the DO  - 10.1234/... format
-                    extractDois(text)
+                if (extension === 'bib' || extension === 'bibtex' || extension === 'ris') {
+                    const matches = [...new Set(
+                        Array.from(text.matchAll(DOI_REGEX), match => match[1])
+                    )]
+                    
+                    setDoiSources(prev => {
+                        const newSources = prev.filter(source => 
+                            !(source.type === 'file' && source.fileName === file.name)
+                        )
+                        return [...newSources, { type: 'file', fileName: file.name, dois: matches }]
+                    })
                 }
             }
         } catch (err) {
@@ -152,6 +170,14 @@ export default function Search() {
 
     const removeFile = (fileName: string) => {
         setUploadedFiles(files => files.filter(file => file.name !== fileName))
+        setDoiSources(prev => prev.filter(source => 
+            !(source.type === 'file' && source.fileName === fileName)
+        ))
+    }
+
+    const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setInputText(e.target.value)
+        handlePastedDois(e.target.value)
     }
 
     return (
@@ -159,17 +185,18 @@ export default function Search() {
 
 
             <div className="flex flex-col items-start text-left">
-                <h1 className="text-2xl font-semibold tracking-tight">Paste DOIs of interesting papers</h1>
-                <p className="text-gray-500">Paste DOIs of papers you've been reading or saving to find more relevant publications for your research. You don't need to worry about formatting. <span className="font-semibold">You can also upload a BibTeX or RIS file.</span></p>
+                <h1 className="text-2xl font-black tracking-tight">Find new papers based on your current reading</h1>
             </div>
 
 
             <Tabs defaultValue="upload" className="w-full">
                 <TabsList>
-                    <TabsTrigger value="upload">Upload file</TabsTrigger>
-                    <TabsTrigger value="paste">Paste DOIs</TabsTrigger>
+                    <TabsTrigger value="upload">Upload references</TabsTrigger>
+                    <TabsTrigger value="paste">Paste paper DOIs</TabsTrigger>
                 </TabsList>
                 <TabsContent value="upload" className="w-full flex flex-col gap-2 text-left text-sm text-gray-500">
+                    <p className="text-gray-500">Provide some examples of papers you've been reading or saving to find more relevant publications for your research.</p>
+                    Upload a BibTeX or RIS file containing relevant papers below.
                     <div 
                         {...getRootProps()} 
                         className={`border-2 border-dashed rounded-lg pt-6 text-center cursor-pointer
@@ -200,14 +227,12 @@ export default function Search() {
                     
                 </TabsContent>
                 <TabsContent value="paste" className="w-full flex flex-col gap-2 text-left text-sm text-gray-500">
-                    Paste the DOIs of papers you've been reading or saving below. Don't worry about formatting - we'll extract them for you.
+                    <p className="text-gray-500">Provide some examples of papers you've been reading or saving to find more relevant publications for your research.</p>
+                    Paste the DOIs of relevant papers below. Separate with comma or space.
                     <Textarea 
                         placeholder="https://doi.org/10.2172/1216566, doi.org/10.1000/182, 10.1025/23456654" 
                         value={inputText}
-                        onChange={(e) => {
-                            setInputText(e.target.value)
-                            extractDois(e.target.value)
-                        }}
+                        onChange={handleTextareaChange}
                     />
                     {error && (
                         <p className="text-red-500 text-sm">{error}</p>
@@ -217,34 +242,27 @@ export default function Search() {
             </Tabs>
 
             <div className="flex flex-wrap gap-2">
-                    {dois.slice(0, 3).map((doi) => (
-                        <div 
-                            key={doi}
-                            className="flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-full text-xs"
-                        >
-                            <span>{doi}</span>
-                            <Button 
-                                variant="ghost"
-                                onClick={() => removeDoi(doi)}
-                                className="hover:text-red-500 bg-transparent hover:bg-transparent p-0 h-6"
-                            >
-                                <X size={14} />
-                            </Button>
-                        </div>
-                    ))}
-                    {dois.length > 6 && (
-                        <div className="flex items-center px-2 py-1 rounded-full text-xs font-medium">
-                            <span>+{dois.length - 6} more DOIs identified</span>
-                        </div>
-                    )}
-                </div>
+                {getAllDois().slice(0, 3).map((doi) => (
+                    <div 
+                        key={doi}
+                        className="flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-full text-xs"
+                    >
+                        <span>{doi}</span>
+                    </div>
+                ))}
+                {getAllDois().length > 3 && (
+                    <div className="flex items-center px-2 py-1 rounded-full text-xs font-medium">
+                        <span>+{getAllDois().length - 3} more DOIs identified</span>
+                    </div>
+                )}
+            </div>
 
             <Button 
                 onClick={handleSubmit} 
-                disabled={isLoading || dois.length === 0}
+                disabled={isLoading || getAllDois().length === 0}
                 className="w-full"
             >
-                {isLoading ? 'Loading...' : `Submit ${dois.length > 0 ? `${dois.length} DOIs` : 'DOIs'}`}
+                {isLoading ? 'Loading...' : `Submit ${getAllDois().length > 0 ? `${getAllDois().length} DOIs` : 'DOIs'}`}
             </Button>
 
 
