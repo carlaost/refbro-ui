@@ -285,7 +285,7 @@ export default function Search() {
                                     1. Export your Zotero collection via right-click &gt; Export collection
                                 </p>
                                 <img
-                                    src="/src/assets/step-1.png"
+                                    src="step-1.png"
                                     alt="Step 1"
                                     className="w-full h-auto rounded-lg shadow-md"
                                 />
@@ -296,7 +296,7 @@ export default function Search() {
                                     2. Save as BibTeX (.bib) or RIS (.ris) file
                                 </p>
                                 <img
-                                    src="/src/assets/step-2.png"
+                                    src="step-2.png"
                                     alt="Step 2"
                                     className="w-full h-auto rounded-lg shadow-md"
                                 />
@@ -307,7 +307,7 @@ export default function Search() {
                                     3. Upload your file to Oshima
                                 </p>
                                 <video
-                                    src="/src/assets/upload.mp4"
+                                    src="upload.mp4"
                                     className="w-full h-auto rounded-lg shadow-md"
                                     muted
                                     autoPlay
@@ -327,7 +327,7 @@ export default function Search() {
                                     DOIs can usually be found on the title page of a paper.
                                 </p>
                                 <video
-                                    src="/src/assets/pdf.mp4"
+                                    src="pdf.mp4"
                                     className="w-full h-auto rounded-lg shadow-md"
                                     muted
                                     autoPlay
@@ -341,7 +341,7 @@ export default function Search() {
                                     Most journal and preprint websites will have a DOI available.
                                 </p>
                                 <video
-                                    src="/src/assets/arxiv.mp4"
+                                    src="arxiv.mp4"
                                     className="w-full h-auto rounded-lg shadow-md"
                                     muted
                                     autoPlay
@@ -355,7 +355,7 @@ export default function Search() {
                                     You can also paste a raw .bib or .risfile.
                                 </p>
                                 <video
-                                    src="/src/assets/bibtex.mp4"
+                                    src="bibtex.mp4"
                                     className="w-full h-auto rounded-lg shadow-md"
                                     muted
                                     autoPlay
