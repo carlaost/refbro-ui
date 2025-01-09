@@ -184,8 +184,9 @@ export default function Search() {
         <div className="flex flex-col items-start justify-center max-w-lg mx-auto pt-20 gap-4">
 
 
-            <div className="flex flex-col items-start text-left">
-                <h1 className="text-2xl font-black tracking-tight">Find new papers based on your current reading</h1>
+            <div className="flex flex-col items-start text-left mb-4">
+                <h1 className="text-2xl font-black tracking-tight">Find new papers to read based on your current interests</h1>
+                <p className="text-gray-500">Oshima is a research paper recommender that keeps you updated with the latest research in your field. Provide some papers you've been reading or saving below to receive your first recommendation.</p>
             </div>
 
 
@@ -195,7 +196,6 @@ export default function Search() {
                     <TabsTrigger value="paste">Paste paper DOIs</TabsTrigger>
                 </TabsList>
                 <TabsContent value="upload" className="w-full flex flex-col gap-2 text-left text-sm text-gray-500">
-                    <p className="text-gray-500">Provide some examples of papers you've been reading or saving to find more relevant publications for your research.</p>
                     Upload a BibTeX or RIS file containing relevant papers below.
                     <div 
                         {...getRootProps()} 
@@ -227,8 +227,7 @@ export default function Search() {
                     
                 </TabsContent>
                 <TabsContent value="paste" className="w-full flex flex-col gap-2 text-left text-sm text-gray-500">
-                    <p className="text-gray-500">Provide some examples of papers you've been reading or saving to find more relevant publications for your research.</p>
-                    Paste the DOIs of relevant papers below. Separate with comma or space.
+                    Paste the DOIs of relevant papers below. Don't worry about formatting, we know a DOI when we see one.
                     <Textarea 
                         placeholder="https://doi.org/10.2172/1216566, doi.org/10.1000/182, 10.1025/23456654" 
                         value={inputText}
