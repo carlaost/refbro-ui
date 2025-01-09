@@ -1,20 +1,20 @@
 import { useState, useCallback } from "react"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
-import { X } from "lucide-react" // For the remove X icon
-import { useNavigate } from 'react-router-dom'
+import { X } from "lucide-react"
+// import { useNavigate } from 'react-router-dom'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useDropzone } from 'react-dropzone'
 
 // Add constant for DOI regex pattern
 const DOI_REGEX = /(?:https?:\/\/doi\.org\/|(?:doi:)?)?(10\.\d{4,}(?:\.\d+)*\/[-%\w.()]+)(?:[^-%\w.()]|$)/g
 
-interface Recommendation {
-    title?: string;
-    doi: string | null;
-    publication_year: number;
-    score: number;
-}
+// interface Recommendation {
+//     title?: string;
+//     doi: string | null;
+//     publication_year: number;
+//     score: number;
+// }
 
 // Add new type definitions
 type DoiSource = {
@@ -27,9 +27,8 @@ type DoiSource = {
 }
 
 export default function Search() {
-    const navigate = useNavigate()
+    // const navigate = useNavigate()
     const [inputText, setInputText] = useState("")
-    const [queryText, setQueryText] = useState("")
     const [doiSources, setDoiSources] = useState<DoiSource[]>([])
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -87,48 +86,48 @@ export default function Search() {
         }
     }
 
-    const handleQuerySubmit = async () => {
-        if (!queryText.trim()) return
+    // const handleQuerySubmit = async () => {
+    //     if (!queryText.trim()) return
         
-        setIsLoading(true)
-        setError(null)
+    //     setIsLoading(true)
+    //     setError(null)
         
-        const queries = queryText.split(',').map(q => q.trim()).filter(q => q)
-        console.log('Submitting queries:', queries)
+    //     const queries = queryText.split(',').map(q => q.trim()).filter(q => q)
+    //     console.log('Submitting queries:', queries)
 
-        try {
-            const response = await fetch('https://refbro.onrender.com/queries', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ queries })
-            })
+    //     try {
+    //         const response = await fetch('https://refbro.onrender.com/queries', {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             body: JSON.stringify({ queries })
+    //         })
 
-            if (!response.ok) {
-                throw new Error(`Failed to fetch query results: ${response.statusText}`)
-            }
+    //         if (!response.ok) {
+    //             throw new Error(`Failed to fetch query results: ${response.statusText}`)
+    //         }
 
-            const data = await response.json()
-            // Transform the recommendations to match the Paper interface
-            const papers = data.recommendations.map((rec: Recommendation) => ({
-                title: rec.title || 'No title available',
-                authors: [], // API doesn't provide authors currently
-                year: rec.publication_year?.toString() || 'Unknown',
-                journal: '', // API doesn't provide journal currently
-                doi: rec.doi || '',
-                abstract: '' // API doesn't provide abstract currently
-            }))
+    //         const data = await response.json()
+    //         // Transform the recommendations to match the Paper interface
+    //         const papers = data.recommendations.map((rec: Recommendation) => ({
+    //             title: rec.title || 'No title available',
+    //             authors: [], // API doesn't provide authors currently
+    //             year: rec.publication_year?.toString() || 'Unknown',
+    //             journal: '', // API doesn't provide journal currently
+    //             doi: rec.doi || '',
+    //             abstract: '' // API doesn't provide abstract currently
+    //         }))
             
-            navigate('/results', { state: { papers } })
+    //         navigate('/results', { state: { papers } })
 
-        } catch (err) {
-            console.error('Error details:', err)
-            setError('Failed to fetch query results')
-        } finally {
-            setIsLoading(false)
-        }
-    }
+    //     } catch (err) {
+    //         console.error('Error details:', err)
+    //         setError('Failed to fetch query results')
+    //     } finally {
+    //         setIsLoading(false)
+    //     }
+    // }
 
     const onDrop = useCallback(async (acceptedFiles: File[]) => {
         setIsLoading(true)
@@ -273,39 +272,43 @@ export default function Search() {
             </div>
 
 
-            <div className="mt-20 w-full" >
+            <div className="mt-20 w-full pb-16" >
                 
                 {activeTab === 'upload' ? (
                     <div>
                         <p className="text-lg font-black mb-4">Export and upload your references in 3 quick steps</p>
-                        <div className="grid grid-cols-3 gap-8 px-20 ">
+                        <div className="grid grid-cols-3 gap-2 px-20 ">
+
+                            <p className=" text-sm text-gray-600 text-center w-full mb-2">
+                                1. Export your Zotero collection via right-click &gt; Export collection
+                            </p>
+                            <p className=" text-sm text-gray-600 text-center w-full mb-2">
+                                2. Save as BibTeX (.bib) or RIS (.ris) file
+                            </p>
+                            <p className=" text-sm text-gray-600 text-center w-full mb-2">
+                                3. Upload your file to Oshima
+                            </p>
                         
-                            <div className="flex flex-col items-center">
-                                <p className=" text-sm text-gray-600 text-center w-full mb-2">
-                                    1. Export your Zotero collection via right-click &gt; Export collection
-                                </p>
+                            <div className="flex flex-col items-center px-4">
+                                
                                 <img
                                     src="step-1.png"
                                     alt="Step 1"
                                     className="w-full h-auto rounded-lg shadow-md"
                                 />
                             </div>
-                            <div className="flex flex-col items-center">
+                            <div className="flex flex-col items-center px-4">
                         
-                                <p className=" text-sm text-center w-full mb-2">
-                                    2. Save as BibTeX (.bib) or RIS (.ris) file
-                                </p>
+                                
                                 <img
                                     src="step-2.png"
                                     alt="Step 2"
                                     className="w-full h-auto rounded-lg shadow-md"
                                 />
                             </div>
-                            <div className="flex flex-col items-center justify-start">
+                            <div className="flex flex-col items-center justify-start px-4">
                         
-                                <p className=" text-sm text-gray-600 text-center w-full mb-2">
-                                    3. Upload your file to Oshima
-                                </p>
+                               
                                 <video
                                     src="upload.mp4"
                                     className="w-full h-auto rounded-lg shadow-md"
@@ -320,12 +323,20 @@ export default function Search() {
                 ) : (
                     <div>
                         <p className="text-lg font-black mb-4">Copy and paste DOIs of relevant papers</p>
-                        <div className="grid grid-cols-3 gap-8 px-20 ">
-                        
-                            <div className="flex flex-col items-center">
-                                <p className=" text-sm text-gray-600 text-center w-full mb-2">
-                                    DOIs can usually be found on the title page of a paper.
+                        <div className="grid grid-cols-3 gap-2 px-20 ">
+
+                            <p className=" text-sm text-gray-600 text-center w-full mb-2">
+                                DOIs can usually be found on the title page of a paper.
+                            </p>
+                            <p className=" text-sm text-gray-600 text-center w-full mb-2">
+                                    Most journal and preprint websites will have a DOI available.
+                            </p>
+                            <p className=" text-sm text-gray-600 text-center w-full mb-2">
+                                    You can also paste a raw .bib or .risfile.
                                 </p>
+
+                            <div className="flex flex-col items-center px-4">
+                                
                                 <video
                                     src="pdf.mp4"
                                     className="w-full h-auto rounded-lg shadow-md"
@@ -335,11 +346,9 @@ export default function Search() {
                                     controls={false}
                                 />
                             </div>
-                            <div className="flex flex-col items-center">
+                            <div className="flex flex-col items-center px-4">
                         
-                                <p className=" text-sm text-center w-full mb-2">
-                                    Most journal and preprint websites will have a DOI available.
-                                </p>
+                                
                                 <video
                                     src="arxiv.mp4"
                                     className="w-full h-auto rounded-lg shadow-md"
@@ -349,11 +358,9 @@ export default function Search() {
                                     controls={false}
                                 />
                             </div>
-                            <div className="flex flex-col items-center justify-start">
+                            <div className="flex flex-col items-center justify-start px-4">
                         
-                                <p className=" text-sm text-gray-600 text-center w-full mb-2">
-                                    You can also paste a raw .bib or .risfile.
-                                </p>
+                                
                                 <video
                                     src="bibtex.mp4"
                                     className="w-full h-auto rounded-lg shadow-md"
@@ -367,31 +374,6 @@ export default function Search() {
                     </div>
                 )}
             </div>
-
-            
-
-
-            
-
-            <div className="grid w-full gap-2 mt-52">
-                <Textarea 
-                    placeholder="Paste keyword sets here. Separate with commas." 
-                    value={queryText}
-                    onChange={(e) => setQueryText(e.target.value)}
-                />
-
-                {error && (
-                    <p className="text-red-500 text-sm">{error}</p>
-                )}
-
-                <Button 
-                    onClick={handleQuerySubmit} 
-                    disabled={isLoading || !queryText.trim()}
-                >
-                    {isLoading ? 'Loading...' : 'Submit queries'}
-                </Button>
-            </div>
-
             
         </div>
     )
