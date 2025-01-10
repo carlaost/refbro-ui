@@ -2,19 +2,22 @@ import { useState, useCallback } from "react"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { X } from "lucide-react"
-// import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useDropzone } from 'react-dropzone'
 
 // Add constant for DOI regex pattern
 const DOI_REGEX = /(?:https?:\/\/doi\.org\/|(?:doi:)?)?(10\.\d{4,}(?:\.\d+)*\/[-%\w.()]+)(?:[^-%\w.()]|$)/g
 
-// interface Recommendation {
-//     title?: string;
-//     doi: string | null;
-//     publication_year: number;
-//     score: number;
-// }
+interface Recommendation {
+    title?: string;
+    doi: string | null;
+    publication_year: number;
+    score: number;
+    authors?: string[];
+    journal?: string;
+    abstract?: string;
+}
 
 // Add new type definitions
 type DoiSource = {
@@ -27,7 +30,7 @@ type DoiSource = {
 }
 
 export default function Search() {
-    // const navigate = useNavigate()
+    const navigate = useNavigate()
     const [inputText, setInputText] = useState("")
     const [doiSources, setDoiSources] = useState<DoiSource[]>([])
     const [isLoading, setIsLoading] = useState(false)
@@ -53,81 +56,44 @@ export default function Search() {
     }
 
     const handleSubmit = async () => {
-        const allDois = getAllDois()
+        const allDois = getAllDois().slice(0, 50) // Limit to first 50 DOIs
         if (allDois.length === 0) return
         
         setIsLoading(true)
         setError(null)
 
         try {
-            const response = await fetch('/api/openalex/fetchMetadata', {
+            const response = await fetch('https://refbro.onrender.com/queries', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ dois: allDois }),
+                body: JSON.stringify({ queries: allDois }),
             })
 
-            console.log('Response status:', response.status)
-            const data = await response.json()
-            console.log('Response data:', data)
-
             if (!response.ok) {
-                throw new Error(`Failed to fetch paper metadata: ${data.error || 'Unknown error'}`)
+                throw new Error(`Failed to fetch recommendations: ${response.statusText}`)
             }
 
-            console.log('Successfully fetched papers:', data.papers)
+            const data = await response.json()
+            const papers = data.recommendations.map((rec: Recommendation) => ({
+                title: rec.title || 'No title available',
+                authors: rec.authors || [],
+                year: rec.publication_year?.toString() || 'Unknown',
+                journal: rec.journal || '',
+                doi: rec.doi || '',
+                abstract: rec.abstract || ''
+            }))
+            
+            navigate('/results', { state: { papers } })
 
         } catch (err) {
             console.error('Error details:', err)
-            setError('Failed to fetch paper metadata')
+            setError('Failed to fetch recommendations')
         } finally {
             setIsLoading(false)
         }
     }
-
-    // const handleQuerySubmit = async () => {
-    //     if (!queryText.trim()) return
-        
-    //     setIsLoading(true)
-    //     setError(null)
-        
-    //     const queries = queryText.split(',').map(q => q.trim()).filter(q => q)
-    //     console.log('Submitting queries:', queries)
-
-    //     try {
-    //         const response = await fetch('https://refbro.onrender.com/queries', {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //             },
-    //             body: JSON.stringify({ queries })
-    //         })
-
-    //         if (!response.ok) {
-    //             throw new Error(`Failed to fetch query results: ${response.statusText}`)
-    //         }
-
-    //         const data = await response.json()
-    //         // Transform the recommendations to match the Paper interface
-    //         const papers = data.recommendations.map((rec: Recommendation) => ({
-    //             title: rec.title || 'No title available',
-    //             authors: [], // API doesn't provide authors currently
-    //             year: rec.publication_year?.toString() || 'Unknown',
-    //             journal: '', // API doesn't provide journal currently
-    //             doi: rec.doi || '',
-    //             abstract: '' // API doesn't provide abstract currently
-    //         }))
-            
-    //         navigate('/results', { state: { papers } })
-
-    //     } catch (err) {
-    //         console.error('Error details:', err)
-    //         setError('Failed to fetch query results')
-    //     } finally {
-    //         setIsLoading(false)
-    //     }
-    // }
 
     const onDrop = useCallback(async (acceptedFiles: File[]) => {
         setIsLoading(true)
