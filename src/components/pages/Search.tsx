@@ -6,8 +6,8 @@ import { useNavigate } from 'react-router-dom'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useDropzone } from 'react-dropzone'
 
-// Update DOI_REGEX to handle URL-encoded characters
-const DOI_REGEX = /(?:https?:\/\/(?:dx\.)?doi\.org\/|doi:|10\.)([^\s]+)/g
+// Update DOI_REGEX to handle URL-encoded characters and exclude delimiters
+const DOI_REGEX = /(?:https?:\/\/(?:dx\.)?doi\.org\/|doi:|10\.)([^\s,;"'<>]+)/g
 
 interface Recommendation {
     title?: string;
