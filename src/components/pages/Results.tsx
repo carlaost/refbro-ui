@@ -11,9 +11,9 @@ import { ExternalLink } from "lucide-react";
 interface Recommendation {
     title?: string;
     doi: string | null;
-    publication_year: number;
+    year: number;
     score: number;
-    authors?: string[];
+    authors?: string;
     journal?: string;
     abstract?: string;
 }
@@ -53,7 +53,7 @@ export default function Results() {
                                     </button>
                                 </div>
                                 <p className="text-sm text-gray-500 font-normal">
-                                    {paper.authors?.join(', ')} • {paper.publication_year} • {paper.journal}
+                                    {paper.authors} • {paper.year} • {paper.journal}
                                 </p>
                             </div>
                         </AccordionTrigger>

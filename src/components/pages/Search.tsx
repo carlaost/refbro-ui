@@ -12,9 +12,9 @@ const DOI_REGEX = /(?:https?:\/\/(?:dx\.)?doi\.org\/|doi:|10\.)([^\s,;"'<>]+)/g
 interface Recommendation {
     title?: string;
     doi: string | null;
-    publication_year: number;
+    year: number;
     score: number;
-    authors?: string[];
+    authors?: string;
     journal?: string;
     abstract?: string;
 }
@@ -81,12 +81,11 @@ export default function Search() {
             const data = await response.json()
             const papers = data.recommendations.map((rec: Recommendation) => ({
                 title: rec.title || 'No title available',
-                authors: rec.authors || [],
-                year: rec.publication_year || '',
+                authors: rec.authors || '',
+                year: rec.year || '',
                 journal: rec.journal || '',
                 doi: rec.doi || '',
                 abstract: rec.abstract || '',
-                publication_year: rec.publication_year,
                 score: rec.score
             }))
             
