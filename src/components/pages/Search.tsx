@@ -82,10 +82,12 @@ export default function Search() {
             const papers = data.recommendations.map((rec: Recommendation) => ({
                 title: rec.title || 'No title available',
                 authors: rec.authors || [],
-                year: rec.publication_year?.toString() || 'Unknown',
+                year: rec.publication_year || '',
                 journal: rec.journal || '',
                 doi: rec.doi || '',
-                abstract: rec.abstract || ''
+                abstract: rec.abstract || '',
+                publication_year: rec.publication_year,
+                score: rec.score
             }))
             
             navigate('/results', { state: { papers } })
