@@ -6,8 +6,8 @@ import { useNavigate } from 'react-router-dom'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useDropzone } from 'react-dropzone'
 
-// Add constant for DOI regex pattern
-const DOI_REGEX = /(?:https?:\/\/doi\.org\/|(?:doi:)?)?(10\.\d{4,}(?:\.\d+)*\/[-%\w.()]+)(?:[^-%\w.()]|$)/g
+// Update DOI_REGEX to handle URL-encoded characters
+const DOI_REGEX = /(?:https?:\/\/(?:dx\.)?doi\.org\/|doi:|10\.)([^\s]+)/g
 
 interface Recommendation {
     title?: string;
@@ -43,10 +43,13 @@ export default function Search() {
         return [...new Set(doiSources.flatMap(source => source.dois))]
     }, [doiSources])
 
-    // Update extractDois to handle pasted DOIs
+    // Update handlePastedDois to decode URL-encoded characters
     const handlePastedDois = (text: string) => {
         const matches = [...new Set(
-            Array.from(text.matchAll(DOI_REGEX), match => match[1])
+            Array.from(text.matchAll(DOI_REGEX), match => {
+                // Decode URL-encoded characters
+                return decodeURIComponent(match[1])
+            })
         )]
         
         setDoiSources(prev => {

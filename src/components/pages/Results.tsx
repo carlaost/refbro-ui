@@ -8,11 +8,14 @@ import {
 
 import { ExternalLink } from "lucide-react";
 
-interface Paper {
-    title: string;
+interface Recommendation {
+    title?: string;
     doi: string | null;
     publication_year: number;
     score: number;
+    authors?: string[];
+    journal?: string;
+    abstract?: string;
 }
 
 export default function Results() {
@@ -36,7 +39,7 @@ export default function Results() {
                 <p className="text-sm text-gray-500">Based on the papers you've been reading, we've found {papers.length} relevant papers for you to read.</p>
             </div>
             <Accordion type="single" collapsible className="w-full">
-                {papers.map((paper: Paper, index: number) => (
+                {papers.map((paper: Recommendation, index: number) => (
                     <AccordionItem key={index} value={`item-${index}`}>
                         <AccordionTrigger>
                             <div className="text-left flex-1">
@@ -49,14 +52,13 @@ export default function Results() {
                                         <ExternalLink className="w-4 h-4" />
                                     </button>
                                 </div>
-                                {/* <p className="text-sm text-gray-500 font-normal">
-                                    {paper.authors.join(', ')} • {paper.year} • {paper.journal}
-                                </p> */}
+                                <p className="text-sm text-gray-500 font-normal">
+                                    {paper.authors?.join(', ')} • {paper.publication_year} • {paper.journal}
+                                </p>
                             </div>
                         </AccordionTrigger>
                         <AccordionContent>
-                            {/* {paper.abstract} */}
-                            Abstract goes here.
+                            {paper.abstract}
                         </AccordionContent>
                     </AccordionItem>
                 ))}
