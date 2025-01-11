@@ -6,8 +6,8 @@ import { useNavigate } from 'react-router-dom'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useDropzone } from 'react-dropzone'
 
-// Update DOI_REGEX to handle URL-encoded characters and exclude delimiters
-const DOI_REGEX = /(?:https?:\/\/(?:dx\.)?doi\.org\/|doi:|10\.)([^\s,;"'<>]+)/g
+// Update DOI_REGEX to properly capture complete DOIs including the "10." prefix
+const DOI_REGEX = /(?:https?:\/\/(?:dx\.)?doi\.org\/|doi:)?([10]\d{1}\.\d+\/[^\s,;"'<>]+)/g
 
 interface Recommendation {
     title?: string;
@@ -28,6 +28,8 @@ type DoiSource = {
     type: 'pasted';
     dois: string[];
 }
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001'
 
 export default function Search() {
     const navigate = useNavigate()
@@ -66,7 +68,7 @@ export default function Search() {
         setError(null)
 
         try {
-            const response = await fetch('https://refbro.onrender.com/queries', {
+            const response = await fetch(`${API_URL}/queries`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
