@@ -179,7 +179,7 @@ export default function Search() {
                         >How?</a></p>
                     </div>
                     <Textarea
-                        placeholder="https://doi.org/10.2172/1216566, doi.org/10.1000/182, 10.1025/23456654"
+                        placeholder="doi.org/10.1000/182, 10.1025/23456654"
                         value={inputText}
                         onChange={handleTextareaChange}
                         className="h-24"
