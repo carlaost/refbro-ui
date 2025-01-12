@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useDropzone } from 'react-dropzone'
 
 // Update DOI_REGEX to properly capture complete DOIs including the "10." prefix
-const DOI_REGEX = /(?:https?:\/\/(?:dx\.)?doi\.org\/|doi:)?([10]\d{1}\.\d+\/[^\s,;"'<>]+)/g
+const DOI_REGEX = /(?:https?:\/\/(?:dx\.)?doi\.org\/|doi:)?(10\.\d{4,9}\/[-_.;()\/:a-zA-Z0-9]+)/g
 
 interface Recommendation {
     title?: string;
@@ -47,16 +47,35 @@ export default function Search() {
 
     // Update handlePastedDois to decode URL-encoded characters
     const handlePastedDois = (text: string) => {
-        const matches = [...new Set(
-            Array.from(text.matchAll(DOI_REGEX), match => {
-                // Decode URL-encoded characters
-                return decodeURIComponent(match[1])
-            })
-        )]
+        console.log("Input text:", text); // Debug input
+        
+        const potentialDois = text
+            .split(/[,;\s]+/)
+            .map(t => t.trim())
+            .filter(t => t.length > 0);
+        
+        console.log("After split:", potentialDois); // Debug splits
+        
+        const matches = potentialDois.flatMap(doi => {
+            console.log("Testing DOI:", doi); // Debug each potential DOI
+            const match = doi.match(DOI_REGEX);
+            console.log("Match result:", match); // Debug regex match
+            
+            if (!match) return [];
+            
+            const cleaned = decodeURIComponent(match[1] || match[0])
+                .replace(/^https?:\/\/(?:dx\.)?doi\.org\//, '')
+                .replace(/^doi:/, '');
+            console.log("Cleaned DOI:", cleaned); // Debug cleaned result
+            return cleaned;
+        });
+        
+        const uniqueMatches = [...new Set(matches)];
+        console.log("Final matches:", uniqueMatches); // Debug final result
         
         setDoiSources(prev => {
             const newSources = prev.filter(source => source.type !== 'pasted')
-            return [...newSources, { type: 'pasted', dois: matches }]
+            return [...newSources, { type: 'pasted', dois: uniqueMatches }]
         })
     }
 
@@ -68,7 +87,7 @@ export default function Search() {
         setError(null)
 
         try {
-            const response = await fetch(`${API_URL}/queries`, {
+            const response = await fetch(`${API_URL}/v1/colab`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
