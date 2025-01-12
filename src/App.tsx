@@ -4,6 +4,7 @@ import Search from './components/pages/SearchSimple'
 import Results from './components/pages/Results'
 import { Button } from './components/ui/button'
 import Faq from './components/pages/Faq'
+import { Analytics } from '@vercel/analytics/react'
 
 function App() {
 
@@ -22,6 +23,7 @@ function App() {
           <Route path="/faq" element={<Faq />} />
         </Routes>
       </div>
+      <Analytics />
     </Router>
   )
 }
