@@ -177,8 +177,8 @@ export default function Search() {
             <div className="max-w-lg mx-auto flex flex-col gap-2 mb-24">
 
             <div className="flex flex-col items-start text-left mb-8">
-                <h1 className="text-2xl font-black tracking-tight">Find new papers to read based on your current reading list</h1>
-                <p className="text-gray-500">Oshima is a research paper recommender that keeps you updated with the latest research in your field. Provide some papers you've been reading or saving below to receive your first recommendation.</p>
+                <h1 className="text-2xl font-black tracking-tight">Find new papers to read based on your current reading list </h1>
+                <p className="text-gray-500 ">Oshima is a research paper recommender that keeps you updated with the latest research in your field. You can upload a reference file or paste a list of DOIs or an entire .bib or .ris file. Oshima will find other papers that might interest you.</p>
             </div>
 
 
@@ -189,8 +189,8 @@ export default function Search() {
                 value={activeTab}
             >
                 <TabsList>
-                    <TabsTrigger value="upload">Upload references</TabsTrigger>
-                    <TabsTrigger value="paste">Paste paper DOIs</TabsTrigger>
+                    <TabsTrigger value="upload">Upload file</TabsTrigger>
+                    <TabsTrigger value="paste">Paste text</TabsTrigger>
                 </TabsList>
                 <TabsContent value="upload" className="w-full flex flex-col gap-2 text-left text-gray-500">
                     Upload a BibTeX or RIS file from your reference manager.
@@ -263,7 +263,7 @@ export default function Search() {
             </div>
 
 
-            <div className="mt-20 w-full pb-16" >
+            {/* <div className="mt-20 w-full pb-16" >
                 
                 {activeTab === 'upload' ? (
                     <div>
@@ -364,7 +364,7 @@ export default function Search() {
                         </div>
                     </div>
                 )}
-            </div>
+            </div> */}
             
         </div>
     )

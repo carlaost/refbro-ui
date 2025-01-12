@@ -1,8 +1,10 @@
 import './App.css'
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
-import Search from './components/pages/Search'
+import Search from './components/pages/SearchSimple'
 import Results from './components/pages/Results'
 import { Button } from './components/ui/button'
+import Faq from './components/pages/Faq'
+
 function App() {
 
   return (
@@ -17,6 +19,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Search />} />
           <Route path="/results" element={<Results />} />
+          <Route path="/faq" element={<Faq />} />
         </Routes>
       </div>
     </Router>
