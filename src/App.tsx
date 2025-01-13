@@ -18,7 +18,9 @@ function App() {
           </a>
         </nav>
         <Routes>
-          <Route path="/" element={<Search />} />
+          <Route path="/" element={<Search apiEndpoint="v1/colab" />} />
+          <Route path="/colab" element={<Search apiEndpoint="v1/colab" />} />
+          <Route path="/queries" element={<Search apiEndpoint="queries" />} />
           <Route path="/results" element={<Results />} />
           <Route path="/faq" element={<Faq />} />
         </Routes>

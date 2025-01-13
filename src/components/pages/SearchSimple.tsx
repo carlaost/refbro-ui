@@ -18,6 +18,10 @@ interface Recommendation {
     abstract?: string;
 }
 
+interface SearchProps {
+    apiEndpoint: string;
+}
+
 // Add new type definitions
 type DoiSource = {
     type: 'file';
@@ -30,7 +34,7 @@ type DoiSource = {
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001'
 
-export default function Search() {
+export default function Search({ apiEndpoint }: SearchProps) {
     const navigate = useNavigate()
     const [inputText, setInputText] = useState("")
     const [doiSources, setDoiSources] = useState<DoiSource[]>([])
@@ -85,7 +89,7 @@ export default function Search() {
         setError(null)
 
         try {
-            const response = await fetch(`${API_URL}/v1/colab`, {
+            const response = await fetch(`${API_URL}/${apiEndpoint}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
