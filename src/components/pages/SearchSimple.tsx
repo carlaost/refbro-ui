@@ -166,7 +166,7 @@ export default function Search({ apiEndpoint }: SearchProps) {
     }
 
     return (
-        <div className="flex flex-col items-start justify-center w-full mx-auto pt-12 gap-4 max-w-lg">
+        <div className="flex flex-col items-start justify-center w-full mx-auto pt-12 gap-4 max-w-lg px-8">
 
             <div className="w-full flex flex-col gap-2 text-left">
                 <h1 className="text-2xl font-black tracking-tight">Better paper recommendations based on your current reading list</h1>

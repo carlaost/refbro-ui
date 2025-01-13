@@ -168,16 +168,16 @@ export default function Results() {
 
     return (
         <>
-            <div className="flex flex-col items-start justify-center max-w-3xl mx-auto pt-20 gap-4 pb-52">
+            <div className="flex flex-col items-start justify-center max-w-3xl mx-auto pt-20 gap-4 pb-52 px-8">
                 <div className="flex flex-col gap-2 items-start text-left">
                     <h1 className="text-2xl font-black tracking-tight">{papers.length} relevant papers found</h1>
                     <p className="text-gray-500">Based on the papers you've been reading, we've found {papers.length} relevant papers for you to read.</p>
                 </div>
 
-                <form onSubmit={handleEmailSubmit} className="w-full max-w-md text-left mb-12">
+                <form onSubmit={handleEmailSubmit} className="w-full  text-left mb-12">
                     <label htmlFor="email" className="text-gray-500 text-sm">Send results to my email</label>
                     <div className="flex flex-col gap-2">
-                        <div className="flex flex-row gap-2">
+                        <div className="flex flex-col md:flex-row gap-2 max-w-lg">
                             <Input 
                                 type="email" 
                                 id="email" 
@@ -191,7 +191,15 @@ export default function Results() {
                                 type="submit" 
                                 disabled={isSubmitting}
                             >
-                                {isSubmitting ? 'Sending...' : 'Submit'}
+                                {isSubmitting ? 'Sending...' : 'Send'}
+                            </Button>
+                            <Button 
+                                type="button"
+                                variant="outline"
+                                onClick={() => setShowFeedback(true)}
+                                className="md:ml-6"
+                            >
+                                Leave Feedback
                             </Button>
                         </div>
                         {submitStatus === 'success' && (
