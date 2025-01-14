@@ -53,7 +53,7 @@ export default function Results() {
     useEffect(() => {
         const timer = setTimeout(() => {
             setShowFeedback(true)
-        }, 10000)
+        }, 20000)
 
         return () => clearTimeout(timer)
     }, [])
