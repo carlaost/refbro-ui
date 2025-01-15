@@ -4,6 +4,16 @@ import { useSearchParams } from "react-router-dom";
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001'
 
+const { data: { session }, error } = await supabase.auth.getSession();
+
+if (error) {
+    console.error("Error fetching session:", error.message);
+}
+
+if (!session) {
+    console.error("User session not found");
+}
+
 
 function ZoteroSuccess() {
     const [searchParams] = useSearchParams();
@@ -37,6 +47,7 @@ function ZoteroSuccess() {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    "Authorization": `Bearer ${session?.access_token}`,
                 },
                 body: JSON.stringify({
                     userId: user.id,
