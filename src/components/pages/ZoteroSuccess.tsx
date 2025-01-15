@@ -4,21 +4,27 @@ import { useSearchParams } from "react-router-dom";
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001'
 
-const { data: { session }, error } = await supabase.auth.getSession();
+async function fetchSession() {
+    const { data: { session }, error } = await supabase.auth.getSession();
 
-if (error) {
-    console.error("Error fetching session:", error.message);
+    if (error) {
+        console.error("Error fetching session:", error.message);
+    }
+
+    if (!session) {
+        console.error("User session not found");
+    }
+
+    return session;
 }
-
-if (!session) {
-    console.error("User session not found");
-}
-
 
 function ZoteroSuccess() {
     const [searchParams] = useSearchParams();
 
     const handleZoteroCallback = async () => {
+        const session = await fetchSession();
+        if (!session) return;
+
         try {
             const oauthToken = searchParams.get("oauth_token");
             const oauthVerifier = searchParams.get("oauth_verifier");
@@ -47,7 +53,7 @@ function ZoteroSuccess() {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer ${session?.access_token}`,
+                    "Authorization": `Bearer ${session.access_token}`,
                 },
                 body: JSON.stringify({
                     userId: user.id,
