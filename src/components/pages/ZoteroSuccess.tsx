@@ -2,6 +2,9 @@ import { useEffect } from 'react';
 import { supabase } from "../../App";
 import { useSearchParams } from "react-router-dom";
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001'
+
+
 function ZoteroSuccess() {
     const [searchParams] = useSearchParams();
 
@@ -30,7 +33,7 @@ function ZoteroSuccess() {
                 return;
             }
 
-            const response = await fetch("http://localhost:5001/zotero-success", {
+            const response = await fetch(`${API_URL}/zotero-success`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
