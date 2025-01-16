@@ -10,6 +10,7 @@ import { createClient, Session } from '@supabase/supabase-js'
 import { Auth } from '@supabase/auth-ui-react'
 import { ThemeSupa } from '@supabase/auth-ui-shared'
 import ZoteroSuccess from './components/pages/ZoteroSuccess'
+import Data from './components/pages/Data'
 
 
 // Initialize Supabase client
@@ -89,6 +90,7 @@ function App() {
           <Route path="/results" element={<Results />} />
           <Route path="/faq" element={<Faq />} />
           <Route path="/zotero-success" element={<ZoteroSuccess />} />
+          <Route path="/data" element={<Data session={session}/>} />
         </Routes>
       </div>
       <Analytics />
