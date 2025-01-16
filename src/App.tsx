@@ -5,8 +5,9 @@ import Results from './components/pages/Results'
 
 import Faq from './components/pages/Faq'
 import { Analytics } from '@vercel/analytics/react'
-// import { useState, useEffect } from 'react'
-// import { createClient, Session } from '@supabase/supabase-js'
+import Zotero from './components/pages/Zotero'
+import { useState, useEffect } from 'react'
+import { createClient, Session } from '@supabase/supabase-js'
 // import { Button } from './components/ui/button'
 // import { Auth } from '@supabase/auth-ui-react'
 // import { ThemeSupa } from '@supabase/auth-ui-shared'
@@ -15,26 +16,26 @@ import { Analytics } from '@vercel/analytics/react'
 
 
 // Initialize Supabase client
-// export const supabase = createClient('https://wyrflssqbzxklzeowjjn.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5cmZsc3NxYnp4a2x6ZW93ampuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY4ODEzNTQsImV4cCI6MjA1MjQ1NzM1NH0.ffQli-xxRUPFsNO8nk2wndpY-ShatAeCmAfD2uHRZcA')
+export const supabase = createClient('https://wyrflssqbzxklzeowjjn.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5cmZsc3NxYnp4a2x6ZW93ampuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY4ODEzNTQsImV4cCI6MjA1MjQ1NzM1NH0.ffQli-xxRUPFsNO8nk2wndpY-ShatAeCmAfD2uHRZcA')
 // const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001'
 
 function App() {
-  // const [session, setSession] = useState<Session | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   // const [showAuth, setShowAuth] = useState(false);
 
-  // useEffect(() => {
-  //   supabase.auth.getSession().then(({ data: { session } }) => {
-  //     setSession(session)
-  //   })
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
+    })
 
-  //   const {
-  //     data: { subscription },
-  //   } = supabase.auth.onAuthStateChange((_event, session) => {
-  //     setSession(session)
-  //   })
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+    })
 
-  //   return () => subscription.unsubscribe()
-  // }, [])
+    return () => subscription.unsubscribe()
+  }, [])
 
   // const handleSignInClick = () => {
   //   setShowAuth(true);
@@ -90,6 +91,7 @@ function App() {
           <Route path="/queries" element={<Search apiEndpoint="queries" />} />
           <Route path="/results" element={<Results />} />
           <Route path="/faq" element={<Faq />} />
+          <Route path="/zotero" element={<Zotero session={session} />} />
           {/* <Route path="/zotero-success" element={<ZoteroSuccess />} /> */}
           {/* <Route path="/data" element={<Data session={session}/>} /> */}
         </Routes>
