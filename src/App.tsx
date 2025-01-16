@@ -73,7 +73,12 @@ function App() {
     return (
       <div className="flex w-full justify-center">
         <div className="w-[400px] mx-auto">
-          <Auth supabaseClient={supabase} appearance={{ theme: ThemeSupa }} providers={['google']} />
+          <Auth 
+            supabaseClient={supabase} 
+            appearance={{ theme: ThemeSupa }} 
+            providers={['google']} 
+            redirectTo={window.location.origin}
+          />
         </div>
       </div>
     )
