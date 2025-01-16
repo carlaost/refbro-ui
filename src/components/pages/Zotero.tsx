@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '../ui/button'
 import { Card } from '../ui/card';
 import { useNavigate } from 'react-router-dom';
+import { InfoIcon, RefreshCcw } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001'
 
@@ -81,14 +82,25 @@ export default function Zotero({ session }: { session: any }) {
             <div className="flex flex-col gap-2 items-start text-left">
                     <h1 className="text-2xl font-black tracking-tight">Your Zotero Collections</h1>
                     <p className="text-gray-500">You can get recommendations based on your Zotero collections. Just select a collection and see what you might have missed.</p>
+                    <div className="text-sm font-medium p-4 bg-red-100 border border-red-300 rounded-md flex flex-row items-center gap-4">
+                        <InfoIcon className="text-red-500 w-8 h-8"/>
+                        <p>Right now, we only support integration with <a href="https://www.zotero.org/">Zotero Web Libraries</a>. We will be adding support for Zotero Desktop soon.</p>
+                    </div>
                 </div>
             <div className="w-full flex flex-col gap-2">
-                {collections.map((collection: any) => (
-                    <Card key={collection.data.key} className="w-full p-2 pl-4 items-start flex flex-row justify-between items-center">
-                        <p className="font-semibold">{collection.data.name} <span className="text-gray-500 font-normal text-sm">{collection.meta.numItems} items</span></p>
-                        <Button className="text-sm" onClick={() => handleGetRecommendations(collection.data.key)}>{buttonText}</Button>
-                    </Card>
-                ))}
+                {collections.length === 0 ? (
+                    <Button className="text-sm" variant="outline" onClick={fetchZoteroCollections}>
+                        <RefreshCcw className="w-4 h-4 mr-2"/>
+                        Fetch Zotero Collections
+                    </Button>
+                ) : (
+                    collections.map((collection: any) => (
+                        <Card key={collection.data.key} className="w-full p-2 pl-4 items-start flex flex-row justify-between items-center">
+                            <p className="font-semibold">{collection.data.name} <span className="text-gray-500 font-normal text-sm">{collection.meta.numItems} items</span></p>
+                            <Button className="text-sm" onClick={() => handleGetRecommendations(collection.data.key)}>{buttonText}</Button>
+                        </Card>
+                    ))
+                )}
             </div>
         </div>
     )
