@@ -9,6 +9,7 @@ export default function Zotero({ session }: { session: any }) {
 
     const navigate = useNavigate();
     const [collections, setCollections] = useState([]);
+    const [buttonText, setButtonText] = useState('Get Recommendations');
 
     useEffect(() => {
         if (session) {
@@ -19,6 +20,7 @@ export default function Zotero({ session }: { session: any }) {
 
     const handleGetRecommendations = async (collectionKey: string) => {
         console.log('Getting recommendations for collection:', collectionKey);
+        setButtonText('Loading...');
         try {
             const response = await fetch(`${API_URL}/zotero/collections/recommendations`, {
                 method: "POST",
@@ -84,7 +86,7 @@ export default function Zotero({ session }: { session: any }) {
                 {collections.map((collection: any) => (
                     <Card key={collection.data.key} className="w-full p-2 pl-4 items-start flex flex-row justify-between items-center">
                         <p className="font-semibold">{collection.data.name} <span className="text-gray-500 font-normal text-sm">{collection.meta.numItems} items</span></p>
-                        <Button className="text-sm" onClick={() => handleGetRecommendations(collection.data.key)}>Get Recommendations</Button>
+                        <Button className="text-sm" onClick={() => handleGetRecommendations(collection.data.key)}>{buttonText}</Button>
                     </Card>
                 ))}
             </div>
