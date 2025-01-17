@@ -4,12 +4,16 @@ import { ExternalLink } from "lucide-react";
 
 interface CollectionProps extends ZoteroCollection {
     onGetRecommendations: (key: string) => void;
+    collectionKey: string;
 }
 
 export default function Collection(props: CollectionProps) {
     return(
         <div className="border-b py-2">
-            <CollectionComponent collection={props}/>
+            <CollectionComponent collection={{
+                ...props,
+                collectionKey: props.key
+            }}/>
         </div>
     )
 }
@@ -17,7 +21,7 @@ export default function Collection(props: CollectionProps) {
 function CollectionComponent({ collection }: { collection: CollectionProps }) {
     return (
         <div className="flex flex-col gap-1">
-            <div key={collection.key} className="items-start text-left w-full my-1 px-0 flex flex-row gap-2 justify-between items-center hover:bg-secondary/60 rounded-md">
+            <div className="items-start text-left w-full my-1 px-0 flex flex-row gap-2 justify-between items-center hover:bg-secondary/60 rounded-md">
                 <div className="flex flex-col gap-2">
                     <p className={`font-medium pl-1 ${collection.numItems === 0 ? 'opacity-60' : ''}`}>
                         {collection.name.length > 60 ? `${collection.name.substring(0, 60)}...` : collection.name}
@@ -43,7 +47,7 @@ function CollectionComponent({ collection }: { collection: CollectionProps }) {
                     variant="secondary" 
                     className="border border-black/10" 
                     size="sm"
-                    onClick={() => collection.onGetRecommendations(collection.key)}
+                    onClick={() => collection.onGetRecommendations(collection.collectionKey)}
                 >
                     Get Recommendations
                 </Button>
@@ -53,9 +57,10 @@ function CollectionComponent({ collection }: { collection: CollectionProps }) {
                 <div className="ml-2 border-l pl-2">
                     {collection.children.map(childCollection => (
                         <CollectionComponent 
-                            key={childCollection.key} 
                             collection={{
                                 ...childCollection,
+                                key: childCollection.key,
+                                collectionKey: childCollection.key,
                                 onGetRecommendations: collection.onGetRecommendations,
                             }} 
                         />
