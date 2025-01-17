@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
 import { Button } from '../ui/button'
-import { Card } from '../ui/card';
+import Collection from '../ui/collectionItem';
 import { useNavigate } from 'react-router-dom';
 import { InfoIcon, RefreshCcw } from 'lucide-react';
+import { ZoteroCollection } from '@/types/types';
+import LoadingToast from '../ui/loadingToast';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001'
 
 export default function Zotero({ session }: { session: any }) {
 
     const navigate = useNavigate();
-    const [collections, setCollections] = useState([]);
-    const [buttonText, setButtonText] = useState('Get Recommendations');
+    const [collections, setCollections] = useState<ZoteroCollection[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         if (session) {
@@ -20,8 +22,7 @@ export default function Zotero({ session }: { session: any }) {
     }, []);
 
     const handleGetRecommendations = async (collectionKey: string) => {
-        console.log('Getting recommendations for collection:', collectionKey);
-        setButtonText('Loading...');
+        setIsLoading(true)
         try {
             const response = await fetch(`${API_URL}/zotero/collections/recommendations`, {
                 method: "POST",
@@ -51,7 +52,7 @@ export default function Zotero({ session }: { session: any }) {
 
         } catch (error) {
             console.error('Error fetching Zotero recommendations:', error);
-        }
+        } 
     };
 
     const fetchZoteroCollections = async () => {
@@ -77,31 +78,36 @@ export default function Zotero({ session }: { session: any }) {
             console.error('Error fetching Zotero collections:', error);
         }
     }
+
+
+
     return (
-        <div className="flex flex-col items-start justify-center w-full max-w-md mx-auto pt-12 gap-4">
+        <div className="flex flex-col items-start justify-center w-full max-w-lg mx-auto pt-12 gap-4">
             <div className="flex flex-col gap-2 items-start text-left">
                     <h1 className="text-2xl font-black tracking-tight">Your Zotero Collections</h1>
                     <p className="text-gray-500">You can get recommendations based on your Zotero collections. Just select a collection and see what you might have missed.</p>
                     <div className="text-sm font-medium p-4 bg-red-100 border border-red-300 rounded-md flex flex-row items-center gap-4">
                         <InfoIcon className="text-red-500 w-8 h-8"/>
-                        <p>Right now, we only support integration with <a href="https://www.zotero.org/">Zotero Web Libraries</a>. We will be adding support for Zotero Desktop soon.</p>
+                        <p>Right now, we only support integration with <a href="https://www.zotero.org/">Zotero Web Libraries</a>. If your Zotero data is not synced we may not be able to access it.</p>
                     </div>
                 </div>
-            <div className="w-full flex flex-col gap-2">
+            <div className="w-full flex flex-col gap-0 mb-20">
                 {collections.length === 0 ? (
                     <Button className="text-sm" variant="outline" onClick={fetchZoteroCollections}>
                         <RefreshCcw className="w-4 h-4 mr-2"/>
                         Fetch Zotero Collections
                     </Button>
                 ) : (
-                    collections.map((collection: any) => (
-                        <Card key={collection.data.key} className="w-full p-2 pl-4 items-start flex flex-row justify-between items-center">
-                            <p className="font-semibold">{collection.data.name} <span className="text-gray-500 font-normal text-sm">{collection.meta.numItems} items</span></p>
-                            <Button className="text-sm" onClick={() => handleGetRecommendations(collection.data.key)}>{buttonText}</Button>
-                        </Card>
+                    collections.map((collection: ZoteroCollection) => (
+                        <Collection 
+                            {...collection}
+                            key={collection.key}
+                            onGetRecommendations={handleGetRecommendations}
+                        />
                     ))
                 )}
             </div>
+            {isLoading ? <LoadingToast/> : null }
         </div>
     )
 }
