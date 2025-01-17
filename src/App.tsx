@@ -27,14 +27,11 @@ function App() {
   useEffect(() => {
     const fetchSession = async () => {
       let currentSession = null;
-      
-      // Try Supabase session first
       const { data: { session }, error } = await supabase.auth.getSession();
       if (session && !error) {
         console.log("Using Supabase session");
         currentSession = session;
       } else {
-        // Fallback to localStorage
         console.log("No Supabase session, checking localStorage");
         const localSession = localStorage.getItem('sb-wyrflssqbzxklzeowjjn-auth-token');
         if (localSession) {
@@ -46,52 +43,56 @@ function App() {
           }
         }
       }
-
-      // Set session and check profile if we have a session from either source
       setSession(currentSession);
       if (currentSession) {
+        setShowAuth(false);
         checkZoteroConnection(currentSession);
       }
     };
-
-    const checkZoteroConnection = async (session: Session) => {
-      try {
-        const response = await fetch(`${API_URL}/v1/profile`, {
-          method: 'POST',
-          headers: {
-              'Authorization': `Bearer ${session.access_token}`,
-              'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-              email: session.user.email
-          })
-      });
-        
-        if (response.ok) {
-          const profile = await response.json();
-          setZoteroConnected(profile.zotero_user_id ? true : false);
-        } else {
-          console.error("Failed to fetch profile:", await response.text());
-        }
-      } catch (error) {
-        console.error("Error checking Zotero connection:", error);
-      }
-    };
-
+  
     fetchSession();
-
+  
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       console.log("Auth state changed, new session:", session);
       setSession(session);
+      if (session) {
+        setShowAuth(false);
+        checkZoteroConnection(session);
+      }
     });
-
+  
     return () => {
       subscription.unsubscribe();
     };
   }, []);
+  
 
   const handleSignInClick = () => {
     setShowAuth(true);
+  };
+
+  const checkZoteroConnection = async (session: Session) => {
+    try {
+      const response = await fetch(`${API_URL}/v1/profile`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            email: session.user.email
+        })
+    });
+      
+      if (response.ok) {
+        const profile = await response.json();
+        setZoteroConnected(profile.zotero_user_id ? true : false);
+      } else {
+        console.error("Failed to fetch profile:", await response.text());
+      }
+    } catch (error) {
+      console.error("Error checking Zotero connection:", error);
+    }
   };
 
   const handleConnectZoteroClick = async () => {
