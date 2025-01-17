@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from '../ui/button'
-import Collection from '../ui/collectionItem';
+import Collection from '../ui/collection';
 import { useNavigate } from 'react-router-dom';
 import { InfoIcon, RefreshCcw } from 'lucide-react';
 import { ZoteroCollection } from '@/types/types';
@@ -21,13 +21,13 @@ export default function Zotero({ session }: { session: any }) {
         }
     }, []);
 
-    const handleGetRecommendations = async (collectionKey: string) => {
-        if (!collectionKey) {
+    const handleGetRecommendations = async (collectionKeys: string[]) => {
+        if (!collectionKeys) {
             console.error('Collection key is missing');
             return;
         }
         setIsLoading(true)
-        console.log('fetching for key', collectionKey)
+        console.log('fetching for key', collectionKeys)
         // try {
         //     const response = await fetch(`${API_URL}/zotero/collections/recommendations`, {
         //         method: "POST",
@@ -105,10 +105,9 @@ export default function Zotero({ session }: { session: any }) {
                 ) : (
                     collections.map((collection: ZoteroCollection) => (
                         <Collection 
-                            {...collection}
                             key={collection.key}
-                            collectionKey={collection.key}
-                            onGetRecommendations={handleGetRecommendations}
+                            collection={collection}
+                            handleGetRecommendations={handleGetRecommendations}
                         />
                     ))
                 )}
