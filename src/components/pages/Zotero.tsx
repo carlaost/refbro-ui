@@ -28,36 +28,36 @@ export default function Zotero({ session }: { session: any }) {
         }
         setIsLoading(true)
         console.log('fetching for key', collectionKeys)
-        // try {
-        //     const response = await fetch(`${API_URL}/zotero/collections/recommendations`, {
-        //         method: "POST",
-        //         headers: {
-        //             "Content-Type": "application/json",
-        //         },
-        //         body: JSON.stringify({ 
-        //             collection_key: collectionKey, 
-        //             email: session.user.email,
-        //         }),
-        //     });
-        //     if (!response.ok) {
-        //         throw new Error(`Failed to fetch recommendations: ${response.statusText}`)
-        //     }
-        //     const data = await response.json();
-        //     const papers = data.recommendations.map((rec: any) => ({
-        //         title: rec.title || 'No title available',
-        //         authors: rec.authors || '',
-        //         year: rec.year || '',
-        //         journal: rec.journal || '',
-        //         doi: rec.doi || '',
-        //         abstract: rec.abstract || '',
-        //         score: rec.score
-        //     }))
+        try {
+            const response = await fetch(`${API_URL}/zotero/collections/recommendations`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ 
+                    collection_keys: collectionKeys, 
+                    email: session.user.email,
+                }),
+            });
+            if (!response.ok) {
+                throw new Error(`Failed to fetch recommendations: ${response.statusText}`)
+            }
+            const data = await response.json();
+            const papers = data.recommendations.map((rec: any) => ({
+                title: rec.title || 'No title available',
+                authors: rec.authors || '',
+                year: rec.year || '',
+                journal: rec.journal || '',
+                doi: rec.doi || '',
+                abstract: rec.abstract || '',
+                score: rec.score
+            }))
 
-        //     navigate('/results', { state: { papers } }) 
+            navigate('/results', { state: { papers } }) 
 
-        // } catch (error) {
-        //     console.error('Error fetching Zotero recommendations:', error);
-        // } 
+        } catch (error) {
+            console.error('Error fetching Zotero recommendations:', error);
+        } 
     };
 
     const fetchZoteroCollections = async () => {
