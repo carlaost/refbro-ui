@@ -5,22 +5,25 @@ import { ExternalLink } from "lucide-react";
 
 interface CollectionProps {
     collection: ZoteroCollection;
-    handleGetRecommendations: (keys: string[]) => void;
+    handleGetRecommendations: (keys: string[], names: string[]) => void;
 }
 
 export default function Collection({ collection, handleGetRecommendations }: CollectionProps) {
-    const collectionKeys = useMemo(() => {
-        const getAllCollectionKeys = (collection: ZoteroCollection): string[] => {
+    const collectionData = useMemo(() => {
+        const getAllCollectionData = (collection: ZoteroCollection): { keys: string[], names: string[] } => {
             let keys = [collection.key];
+            let names = [collection.name];
             if (collection.children?.length > 0) {
                 collection.children.forEach(child => {
-                    keys = [...keys, ...getAllCollectionKeys(child)];
+                    const childData = getAllCollectionData(child);
+                    keys = [...keys, ...childData.keys];
+                    names = [...names, ...childData.names];
                 });
             }
-            return keys;
+            return { keys, names };
         };
         
-        return getAllCollectionKeys(collection);
+        return getAllCollectionData(collection);
     }, [collection]);
 
     return (
@@ -46,7 +49,7 @@ export default function Collection({ collection, handleGetRecommendations }: Col
                     </div>
                 </div>
                 <Button
-                    onClick={() => handleGetRecommendations(collectionKeys)}
+                    onClick={() => handleGetRecommendations(collectionData.keys, collectionData.names)}
                     disabled={collection.numItems === 0}
                     variant="secondary"
                     className="border border-black/5"

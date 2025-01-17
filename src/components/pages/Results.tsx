@@ -49,8 +49,24 @@ export default function Results() {
     
     const location = useLocation()
     const papers = location.state?.papers
+    const originCollections = location.state?.names
+
+    const formatCollectionNames = (collections: string[]): string => {
+        if (!collections?.length) return '';
+        
+        if (collections.length === 1) {
+            return collections[0];
+        }
+        
+        if (collections.length === 2) {
+            return `${collections[0]} and ${collections[1]}`;
+        }
+        
+        return `${collections.slice(0, -1).join(', ')}, and ${collections[collections.length - 1]}`;
+    };
 
     useEffect(() => {
+        console.log('originCollections', originCollections)
         const timer = setTimeout(() => {
             setShowFeedback(true)
         }, 20000)
@@ -171,7 +187,12 @@ export default function Results() {
             <div className="flex flex-col items-start justify-center max-w-3xl mx-auto pt-20 gap-4 pb-52 px-8">
                 <div className="flex flex-col gap-2 items-start text-left">
                     <h1 className="text-2xl font-black tracking-tight">{papers.length} relevant papers found</h1>
-                    <p className="text-gray-500">Based on the papers you've been reading, we've found {papers.length} relevant papers for you to read.</p>
+                    <p className="text-gray-500">
+                        {originCollections?.length > 0 
+                            ? `Based on the papers in ${formatCollectionNames(originCollections)}, we've found ${papers.length} relevant papers for you to read.`
+                            : `Based on the papers you've been reading, we've found ${papers.length} relevant papers for you to read.`
+                        }
+                    </p>
                 </div>
 
                 <form onSubmit={handleEmailSubmit} className="w-full  text-left mb-12">

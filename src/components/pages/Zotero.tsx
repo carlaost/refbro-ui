@@ -21,7 +21,7 @@ export default function Zotero({ session }: { session: any }) {
         }
     }, []);
 
-    const handleGetRecommendations = async (collectionKeys: string[]) => {
+    const handleGetRecommendations = async (collectionKeys: string[], names: string[]) => {
         if (!collectionKeys) {
             console.error('Collection key is missing');
             return;
@@ -53,7 +53,7 @@ export default function Zotero({ session }: { session: any }) {
                 score: rec.score
             }))
 
-            navigate('/results', { state: { papers } }) 
+            navigate('/results', { state: { papers, names } }) 
 
         } catch (error) {
             console.error('Error fetching Zotero recommendations:', error);
