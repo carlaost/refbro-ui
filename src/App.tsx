@@ -1,5 +1,5 @@
 import './App.css'
-import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 import Search from './components/pages/SearchSimple'
 import Results from './components/pages/Results'
 
@@ -22,15 +22,59 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001'
 function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [showAuth, setShowAuth] = useState(false);
+  const [zoteroConnected, setZoteroConnected] = useState(false);
 
   useEffect(() => {
     const fetchSession = async () => {
+      let currentSession = null;
+      
+      // Try Supabase session first
       const { data: { session }, error } = await supabase.auth.getSession();
-      if (error) {
-        console.error("Error fetching session:", error);
+      if (session && !error) {
+        console.log("Using Supabase session");
+        currentSession = session;
       } else {
-        console.log("Fetched session:", session);
-        setSession(session);
+        // Fallback to localStorage
+        console.log("No Supabase session, checking localStorage");
+        const localSession = localStorage.getItem('sb-wyrflssqbzxklzeowjjn-auth-token');
+        if (localSession) {
+          try {
+            currentSession = JSON.parse(localSession);
+            console.log("Using localStorage session");
+          } catch (e) {
+            console.error("Error parsing localStorage session:", e);
+          }
+        }
+      }
+
+      // Set session and check profile if we have a session from either source
+      setSession(currentSession);
+      if (currentSession) {
+        checkZoteroConnection(currentSession);
+      }
+    };
+
+    const checkZoteroConnection = async (session: Session) => {
+      try {
+        const response = await fetch(`${API_URL}/v1/profile`, {
+          method: 'POST',
+          headers: {
+              'Authorization': `Bearer ${session.access_token}`,
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+              email: session.user.email
+          })
+      });
+        
+        if (response.ok) {
+          const profile = await response.json();
+          setZoteroConnected(profile.zotero_user_id ? true : false);
+        } else {
+          console.error("Failed to fetch profile:", await response.text());
+        }
+      } catch (error) {
+        console.error("Error checking Zotero connection:", error);
       }
     };
 
@@ -89,11 +133,16 @@ function App() {
       <div className="light min-h-screen">
         <nav className="flex flex-row w-screen py-2 px-6 justify-between items-center">
           <Link to="/" className="text-black hover:text-gray-500 ">Oshima</Link>
-          <LocationButtons session={session} onSignInClick={handleSignInClick} onConnectZoteroClick={handleConnectZoteroClick} />
+          <LocationButtons 
+            session={session} 
+            onSignInClick={handleSignInClick} 
+            onConnectZoteroClick={handleConnectZoteroClick} 
+            zoteroConnected={zoteroConnected}
+          />
         </nav>
         <Routes>
-          <Route path="/" element={<Search apiEndpoint="v1/colab" />} />
-          <Route path="/colab" element={<Search apiEndpoint="v1/colab" />} />
+          <Route path="/" element={<Search apiEndpoint="v1/colab" session={session} zoteroConnected={zoteroConnected}/>} />
+          <Route path="/colab" element={<Search apiEndpoint="v1/colab"/>} />
           <Route path="/queries" element={<Search apiEndpoint="queries" />} />
           <Route path="/results" element={<Results />} />
           <Route path="/faq" element={<Faq />} />
@@ -106,17 +155,18 @@ function App() {
   )
 }
 
-function LocationButtons({ session, onSignInClick, onConnectZoteroClick }: { session: any, onSignInClick: any, onConnectZoteroClick: any }) {
-  const location = useLocation();
+function LocationButtons({ session, onSignInClick, onConnectZoteroClick, zoteroConnected }: { session: any, onSignInClick: any, onConnectZoteroClick: any, zoteroConnected: any }) {
+  // const location = useLocation();
 
   return (
     <div className="flex flex-row gap-2">
-      {location.pathname === '/zotero' && (
-        <>
-          {!session && <Button onClick={onSignInClick}>Sign In</Button>}
-          {session && <Button onClick={onConnectZoteroClick}>Connect Zotero</Button>}
-        </>
-      )}
+      {/* {location.pathname === '/zotero' && ( */}
+      <>
+        {!session && <Button onClick={onSignInClick}>Sign In</Button>}
+        {session && !zoteroConnected && <Button onClick={onConnectZoteroClick}>Connect Zotero</Button>}
+        {session && zoteroConnected && <Link to="/zotero"><Button>Zotero Collections</Button></Link>}
+      </>
+      {/* )} */}
     </div>
   );
 }

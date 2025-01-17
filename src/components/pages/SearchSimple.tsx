@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { useNavigate } from 'react-router-dom'
 import { DropArea } from "@/components/ui/drop-area"
 import { Separator } from "@/components/ui/separator"
+import { InfoIcon } from "lucide-react"
 
 // Update DOI_REGEX to properly capture complete DOIs including the "10." prefix
 const DOI_REGEX = /(?:https?:\/\/(?:dx\.)?doi\.org\/|doi:)?(10\.\d{4,9}\/[-_.;()\/:a-zA-Z0-9]+)/g
@@ -20,6 +21,8 @@ interface Recommendation {
 
 interface SearchProps {
     apiEndpoint: string;
+    session?: any;
+    zoteroConnected?: boolean;
 }
 
 // Add new type definitions
@@ -34,7 +37,7 @@ type DoiSource = {
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001'
 
-export default function Search({ apiEndpoint }: SearchProps) {
+export default function Search({ apiEndpoint, session, zoteroConnected }: SearchProps) {
     const navigate = useNavigate()
     const [inputText, setInputText] = useState("")
     const [doiSources, setDoiSources] = useState<DoiSource[]>([])
@@ -171,6 +174,18 @@ export default function Search({ apiEndpoint }: SearchProps) {
             <div className="w-full flex flex-col gap-2 text-left">
                 <h1 className="text-2xl font-black tracking-tight">Better paper recommendations based on your current reading list</h1>
                 <p className="text-gray-500">Oshima is a research paper recommender that keeps you updated with the latest research in your field. Provide some example papers you've been reading or saving. Oshima will find other papers that might interest you.</p>
+                <p className="text-gray-500 font-bold"></p>
+                <div className={`text-sm font-medium p-4 bg-blue-100 border border-blue-300 rounded-md flex flex-row items-start gap-4 ${zoteroConnected ? 'mb-16' : ''}`}>
+                    <InfoIcon className="text-blue-500 w-8 h-8 mt-2"/>
+                    <div className="flex flex-col gap-2">
+                        <p>
+                            You can now get recommendations based on your Zotero collections!
+                            {!zoteroConnected && session === null && " Create an account to get started."}
+                            {!zoteroConnected && session !== null && " Click on Connect Zotero to link your account."}
+                        </p>
+                        {zoteroConnected && <Button className="" onClick={() => navigate('/zotero')}>Try Recommendations based on Zotero</Button>}
+                    </div>
+                </div>
             </div>
 
             <div className="w-full flex flex-col gap-4 px-2">
