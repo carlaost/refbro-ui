@@ -127,7 +127,7 @@ function App() {
           <Auth 
             supabaseClient={supabase} 
             appearance={{ theme: ThemeSupa }} 
-            providers={['google']} 
+            providers={[]} 
             redirectTo={window.location.origin}
           />
         </div>
