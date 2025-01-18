@@ -95,6 +95,12 @@ function App() {
     }
   };
 
+  const handleSignOutClick = async () => {
+    await supabase.auth.signOut();
+    setSession(null);
+    setZoteroConnected(false);
+  };
+
   const handleConnectZoteroClick = async () => {
     try {
       console.log('Connecting to Zotero...');
@@ -139,10 +145,11 @@ function App() {
             onSignInClick={handleSignInClick} 
             onConnectZoteroClick={handleConnectZoteroClick} 
             zoteroConnected={zoteroConnected}
+            onSignOutClick={handleSignOutClick}
           />
         </nav>
         <Routes>
-          <Route path="/" element={<Search apiEndpoint="v1/colab" session={session} zoteroConnected={zoteroConnected}/>} />
+          <Route path="/" element={<Search apiEndpoint="v1/colab" session={session} zoteroConnected={zoteroConnected} handleConnectZoteroClick={handleConnectZoteroClick}/>} />
           <Route path="/colab" element={<Search apiEndpoint="v1/colab"/>} />
           <Route path="/queries" element={<Search apiEndpoint="queries" />} />
           <Route path="/results" element={<Results />} />
@@ -156,16 +163,18 @@ function App() {
   )
 }
 
-function LocationButtons({ session, onSignInClick, onConnectZoteroClick, zoteroConnected }: { session: any, onSignInClick: any, onConnectZoteroClick: any, zoteroConnected: any }) {
+function LocationButtons({ session, onSignInClick, onConnectZoteroClick, zoteroConnected, onSignOutClick }: { session: any, onSignInClick: any, onConnectZoteroClick: any, zoteroConnected: any, onSignOutClick: any }) {
   // const location = useLocation();
 
   return (
     <div className="flex flex-row gap-2">
       {/* {location.pathname === '/zotero' && ( */}
       <>
-        {!session && <Button onClick={onSignInClick}>Sign In</Button>}
         {session && !zoteroConnected && <Button onClick={onConnectZoteroClick}>Connect Zotero</Button>}
         {session && zoteroConnected && <Link to="/zotero"><Button>Zotero Collections</Button></Link>}
+        {session ? <Button variant="outline" onClick={onSignOutClick}>Sign Out</Button> : <Button variant="outline" onClick={onSignInClick}>Sign In</Button>}
+        
+        
       </>
       {/* )} */}
     </div>

@@ -23,6 +23,7 @@ interface SearchProps {
     apiEndpoint: string;
     session?: any;
     zoteroConnected?: boolean;
+    handleConnectZoteroClick?: () => void;
 }
 
 // Add new type definitions
@@ -37,7 +38,7 @@ type DoiSource = {
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001'
 
-export default function Search({ apiEndpoint, session, zoteroConnected }: SearchProps) {
+export default function Search({ apiEndpoint, session, zoteroConnected, handleConnectZoteroClick }: SearchProps) {
     const navigate = useNavigate()
     const [inputText, setInputText] = useState("")
     const [doiSources, setDoiSources] = useState<DoiSource[]>([])
@@ -181,9 +182,12 @@ export default function Search({ apiEndpoint, session, zoteroConnected }: Search
                         <p>
                             You can now get recommendations based on your Zotero collections!
                             {!zoteroConnected && session === null && " Create an account to get started."}
-                            {!zoteroConnected && session !== null && " Click on Connect Zotero to link your account."}
                         </p>
-                        {zoteroConnected && <Button className="" onClick={() => navigate('/zotero')}>Try Recommendations based on Zotero</Button>}
+                        {session && (zoteroConnected ? 
+                            <Button className="mr-8" onClick={() => navigate('/zotero')}>Try Recommendations based on Zotero</Button> 
+                            :
+                            <Button className="mr-8" onClick={handleConnectZoteroClick}>Connect Zotero</Button>
+                        )}
                     </div>
                 </div>
             </div>

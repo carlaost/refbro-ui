@@ -91,8 +91,8 @@ export default function Zotero({ session }: { session: any }) {
             <div className="flex flex-col gap-2 items-start text-left">
                     <h1 className="text-2xl font-black tracking-tight">Your Zotero Collections</h1>
                     <p className="text-gray-500">You can get recommendations based on your Zotero collections. Just select a collection and see what you might have missed.</p>
-                    <div className="text-sm font-medium p-4 bg-red-100 border border-red-300 rounded-md flex flex-row items-center gap-4">
-                        <InfoIcon className="text-red-500 w-8 h-8"/>
+                    <div className="text-sm font-medium p-4 bg-yellow-50 border border-yellow-300 rounded-md flex flex-row items-center gap-4">
+                        <InfoIcon className="text-yellow-500 w-8 h-8"/>
                         <p>Right now, we only support integration with <a href="https://www.zotero.org/">Zotero Web Libraries</a>. If your Zotero data is not synced we may not be able to access it.</p>
                     </div>
                 </div>
