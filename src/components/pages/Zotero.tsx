@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { InfoIcon, RefreshCcw } from 'lucide-react';
 import { ZoteroCollection } from '@/types/types';
 import LoadingToast from '../ui/loadingToast';
+import { Switch } from "../ui/switch"
+import { Label } from "../ui/label"
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001'
 
@@ -13,6 +15,7 @@ export default function Zotero({ session }: { session: any }) {
     const navigate = useNavigate();
     const [collections, setCollections] = useState<ZoteroCollection[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [useHybrid, setUseHybrid] = useState(false);
 
     useEffect(() => {
         if (session) {
@@ -37,27 +40,54 @@ export default function Zotero({ session }: { session: any }) {
                 body: JSON.stringify({ 
                     collection_keys: collectionKeys, 
                     email: session.user.email,
+                    endpoint: useHybrid ? 'mixed' : 'colab'
                 }),
             });
             if (!response.ok) {
                 throw new Error(`Failed to fetch recommendations: ${response.statusText}`)
             }
             const data = await response.json();
-            const papers = data.recommendations.map((rec: any) => ({
-                title: rec.title || 'No title available',
-                authors: rec.authors || '',
-                year: rec.year || '',
-                journal: rec.journal || '',
-                doi: rec.doi || '',
-                abstract: rec.abstract || '',
-                score: rec.score
-            }))
-
-            navigate('/results', { state: { papers, names } }) 
-
+            
+            if (useHybrid) {
+                const papers1 = data.colab_response.recommendations.map((rec: any) => ({
+                    title: rec.title || 'No title available',
+                    authors: rec.authors || '',
+                    year: rec.year || '',
+                    journal: rec.journal || '',
+                    doi: rec.doi || '',
+                    abstract: rec.abstract || '',
+                    score: rec.score
+                }));
+                
+                const papers2 = data.queries_response.recommendations.map((rec: any) => ({
+                    title: rec.title || 'No title available',
+                    authors: rec.authors || '',
+                    year: rec.year || '',
+                    journal: rec.journal || '',
+                    doi: rec.doi || '',
+                    abstract: rec.abstract || '',
+                    score: rec.score
+                }));
+                
+                navigate('/results', { state: { papers1, papers2, names: ['Collaborative', 'Query-based'], isHybrid: true } });
+            } else {
+                const papers = data.recommendations.map((rec: any) => ({
+                    title: rec.title || 'No title available',
+                    authors: rec.authors || '',
+                    year: rec.year || '',
+                    journal: rec.journal || '',
+                    doi: rec.doi || '',
+                    abstract: rec.abstract || '',
+                    score: rec.score
+                }));
+                
+                navigate('/results', { state: { papers, names } });
+            }
         } catch (error) {
             console.error('Error fetching Zotero recommendations:', error);
-        } 
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const fetchZoteroCollections = async () => {
@@ -96,6 +126,16 @@ export default function Zotero({ session }: { session: any }) {
                         <p>Right now, we only support integration with <a href="https://www.zotero.org/">Zotero Web Libraries</a>. If your Zotero data is not synced we may not be able to access it.</p>
                     </div>
                 </div>
+            <div className="flex items-center space-x-2 mb-4">
+                <Switch
+                    id="hybrid-mode"
+                    checked={useHybrid}
+                    onCheckedChange={setUseHybrid}
+                />
+                <Label htmlFor="hybrid-mode">
+                    Use hybrid recommendations
+                </Label>
+            </div>
             <div className="w-full flex flex-col gap-0 mb-20">
                 {collections.length === 0 ? (
                     <Button className="text-sm" variant="outline" onClick={fetchZoteroCollections}>

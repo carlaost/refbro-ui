@@ -49,6 +49,9 @@ export default function Results() {
     
     const location = useLocation()
     const papers = location.state?.papers
+    const papers1 = location.state?.papers1
+    const papers2 = location.state?.papers2
+    const isHybrid = location.state?.isHybrid
     const originCollections = location.state?.names
 
     const formatCollectionNames = (collections: string[]): string => {
@@ -184,13 +187,18 @@ export default function Results() {
 
     return (
         <>
-            <div className="flex flex-col items-start justify-center max-w-3xl mx-auto pt-20 gap-4 pb-52 px-8">
+            <div className="flex flex-col items-start justify-center max-w-6xl mx-auto pt-20 gap-4 pb-52 px-8">
                 <div className="flex flex-col gap-2 items-start text-left">
-                    <h1 className="text-2xl font-black tracking-tight">{papers.length} relevant papers found</h1>
+                    <h1 className="text-2xl font-black tracking-tight">
+                        {isHybrid 
+                            ? `${papers1.length + papers2.length} relevant papers found`
+                            : `${papers.length} relevant papers found`
+                        }
+                    </h1>
                     <p className="text-gray-500">
                         {originCollections?.length > 0 
-                            ? `Based on the papers in ${formatCollectionNames(originCollections)}, we've found ${papers.length} relevant papers for you to read.`
-                            : `Based on the papers you've been reading, we've found ${papers.length} relevant papers for you to read.`
+                            ? `Based on the papers in ${formatCollectionNames(originCollections)}, we've found ${isHybrid ? papers1.length + papers2.length : papers.length} relevant papers for you to read.`
+                            : `Based on the papers you've been reading, we've found ${isHybrid ? papers1.length + papers2.length : papers.length} relevant papers for you to read.`
                         }
                     </p>
                 </div>
@@ -232,31 +240,92 @@ export default function Results() {
                     </div>
                 </form>
                 
-                <Accordion type="single" collapsible className="w-full">
-                    {papers.map((paper: Paper, index: number) => (
-                        <AccordionItem key={index} value={`item-${index}`}>
-                            <AccordionTrigger>
-                                <div className="text-left flex-1">
-                                    <div className="flex items-start">
-                                        <h2 className="text-lg font-semibold tracking-tight">{paper.title}</h2>
-                                        <button
-                                            onClick={(e) => handleDoiClick(e, paper.doi || '')}
-                                            className="ml-2 p-1 hover:bg-gray-100 bg-transparent rounded-full"
-                                        >
-                                            <ExternalLink className="w-4 h-4" />
-                                        </button>
+                {isHybrid ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
+                        <div>
+                            <h2 className="text-xl font-bold mb-4">Collaborative Filtering Results</h2>
+                            <Accordion type="single" collapsible className="w-full">
+                                {papers1.map((paper: Paper, index: number) => (
+                                    <AccordionItem key={index} value={`item-${index}`}>
+                                        <AccordionTrigger>
+                                            <div className="text-left flex-1">
+                                                <div className="flex items-start">
+                                                    <h2 className="text-lg font-semibold tracking-tight">{paper.title}</h2>
+                                                    <button
+                                                        onClick={(e) => handleDoiClick(e, paper.doi || '')}
+                                                        className="ml-2 p-1 hover:bg-gray-100 bg-transparent rounded-full"
+                                                    >
+                                                        <ExternalLink className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                                <p className="text-sm text-gray-500 font-normal">
+                                                    {paper.authors} • {paper.year} • {paper.journal}
+                                                </p>
+                                            </div>
+                                        </AccordionTrigger>
+                                        <AccordionContent>
+                                            {paper.abstract}
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                ))}
+                            </Accordion>
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-bold mb-4">Content-Based Results</h2>
+                            <Accordion type="single" collapsible className="w-full">
+                                {papers2.map((paper: Paper, index: number) => (
+                                    <AccordionItem key={index} value={`item-${index}`}>
+                                        <AccordionTrigger>
+                                            <div className="text-left flex-1">
+                                                <div className="flex items-start">
+                                                    <h2 className="text-lg font-semibold tracking-tight">{paper.title}</h2>
+                                                    <button
+                                                        onClick={(e) => handleDoiClick(e, paper.doi || '')}
+                                                        className="ml-2 p-1 hover:bg-gray-100 bg-transparent rounded-full"
+                                                    >
+                                                        <ExternalLink className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                                <p className="text-sm text-gray-500 font-normal">
+                                                    {paper.authors} • {paper.year} • {paper.journal}
+                                                </p>
+                                            </div>
+                                        </AccordionTrigger>
+                                        <AccordionContent>
+                                            {paper.abstract}
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                ))}
+                            </Accordion>
+                        </div>
+                    </div>
+                ) : (
+                    <Accordion type="single" collapsible className="w-full">
+                        {papers.map((paper: Paper, index: number) => (
+                            <AccordionItem key={index} value={`item-${index}`}>
+                                <AccordionTrigger>
+                                    <div className="text-left flex-1">
+                                        <div className="flex items-start">
+                                            <h2 className="text-lg font-semibold tracking-tight">{paper.title}</h2>
+                                            <button
+                                                onClick={(e) => handleDoiClick(e, paper.doi || '')}
+                                                className="ml-2 p-1 hover:bg-gray-100 bg-transparent rounded-full"
+                                            >
+                                                <ExternalLink className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                        <p className="text-sm text-gray-500 font-normal">
+                                            {paper.authors} • {paper.year} • {paper.journal}
+                                        </p>
                                     </div>
-                                    <p className="text-sm text-gray-500 font-normal">
-                                        {paper.authors} • {paper.year} • {paper.journal}
-                                    </p>
-                                </div>
-                            </AccordionTrigger>
-                            <AccordionContent>
-                                {paper.abstract}
-                            </AccordionContent>
-                        </AccordionItem>
-                    ))}
-                </Accordion>
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                    {paper.abstract}
+                                </AccordionContent>
+                            </AccordionItem>
+                        ))}
+                    </Accordion>
+                )}
             </div>
 
             <Dialog open={showFeedback} onOpenChange={setShowFeedback}>
