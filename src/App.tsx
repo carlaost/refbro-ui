@@ -149,9 +149,9 @@ function App() {
           />
         </nav>
         <Routes>
-          <Route path="/" element={<Search apiEndpoint="v1/colab" session={session} zoteroConnected={zoteroConnected} handleConnectZoteroClick={handleConnectZoteroClick}/>} />
-          <Route path="/colab" element={<Search apiEndpoint="v1/colab"/>} />
-          <Route path="/queries" element={<Search apiEndpoint="queries" />} />
+          <Route path="/" element={<Search apiEndpoint="v1/mixed" session={session} zoteroConnected={zoteroConnected} handleConnectZoteroClick={handleConnectZoteroClick}/>} />
+          {/* <Route path="/colab" element={<Search apiEndpoint="v1/colab"/>} /> */}
+          {/* <Route path="/queries" element={<Search apiEndpoint="queries" />} /> */}
           <Route path="/results" element={<Results />} />
           <Route path="/faq" element={<Faq />} />
           <Route path="/zotero" element={<Zotero session={session} />} />
